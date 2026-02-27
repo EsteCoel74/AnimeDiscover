@@ -24,58 +24,60 @@
             Margin="5,0,0,15"/>
 
             <!-- Grille d'animes -->
-        <ItemsControl Grid.Row="1" Name="ForecastList">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <UniformGrid Columns="3" Rows="2"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl Name="AnimeList">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
 
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Style="{StaticResource AnimeCardStyle}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource AnimeCardStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                            <!-- Nom et Description -->
-                            <StackPanel Grid.Column="0" 
-                                    VerticalAlignment="Center"
-                                    Margin="0,0,15,0">
-                                <TextBlock Text="{Binding AnimeName}" 
-                                       Foreground="{DynamicResource TextPrimaryColor}"
-                                       FontSize="14"
-                                       FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Description}" 
-                                       Foreground="{DynamicResource TextSecondaryColor}"
-                                       FontSize="11"
-                                       Margin="0,2,0,0"/>
-                            </StackPanel>
+                                <!-- Nom et Description -->
+                                <StackPanel Grid.Column="0" 
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,15,0">
+                                    <TextBlock Text="{Binding AnimeName}" 
+                                           Foreground="{DynamicResource TextPrimaryColor}"
+                                           FontSize="14"
+                                           FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Description}" 
+                                           Foreground="{DynamicResource TextSecondaryColor}"
+                                           FontSize="11"
+                                           Margin="0,2,0,0"/>
+                                </StackPanel>
 
-                            <!-- Image et Note -->
-                            <StackPanel Grid.Column="1" 
-                                    Orientation="Horizontal"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center">
-                                <Viewbox Height="35" Width="35" Margin="0,0,10,0">
-                                    <TextBlock Text="{Binding AnimeJPG}" 
-                                           FontSize="35"
-                                           Foreground="{DynamicResource TextPrimaryColor}"/>
-                                </Viewbox>
-                                <TextBlock Text="{Binding Note}" 
-                                       Foreground="{DynamicResource TextSecondaryColor}"
-                                       FontSize="11"
-                                       VerticalAlignment="Center"
-                                       TextWrapping="Wrap"
-                                       MaxWidth="100"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                                <!-- Image et Note -->
+                                <StackPanel Grid.Column="1" 
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                    <Viewbox Height="35" Width="35" Margin="0,0,10,0">
+                                        <TextBlock Text="{Binding AnimeJPG}" 
+                                               FontSize="35"
+                                               Foreground="{DynamicResource TextPrimaryColor}"/>
+                                    </Viewbox>
+                                    <TextBlock Text="{Binding Note}" 
+                                           Foreground="{DynamicResource TextSecondaryColor}"
+                                           FontSize="11"
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           MaxWidth="100"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Page>
