@@ -5,8 +5,118 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnimeDiscover"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="650" Width="800">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
 
+        <!--========== Top Header Row ==========-->
+        <Grid Grid.Row="0" Background="#F0F0F0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <!--Logo and Title-->
+            <TextBlock Grid.Column="0" Text="AnimeDiscover" FontSize="24" FontWeight="Bold" 
+                       Foreground="#333333" VerticalAlignment="Center" Margin="10,0,0,0"/>
+
+            <!--Settings Button-->
+            <Button Grid.Column="1" Content="⚙ Paramètres" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                    Margin="0,0,10,0" Padding="8,5" Background="#E0E0E0" 
+                    BorderBrush="#999999" BorderThickness="1" Cursor="Hand"/>
+        </Grid>
+
+        <!--========== Search and Filter Row ==========-->
+        <Grid Grid.Row="1" Background="#FFFFFF" Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="100"/>
+            </Grid.ColumnDefinitions>
+
+            <!--Search Bar-->
+            <Grid Grid.Column="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="50"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" x:Name="SearchTextBox" 
+                         Text=""
+                         Padding="10,8" 
+                         FontSize="14"
+                         VerticalContentAlignment="Center"
+                         BorderBrush="#CCCCCC" 
+                         BorderThickness="1"/>
+
+                <Button Grid.Column="1" Content="🔍" Margin="5,0,0,0" 
+                        Background="#4CAF50" Foreground="White" 
+                        FontSize="16" Cursor="Hand"/>
+            </Grid>
+
+            <!--Genre Filter-->
+            <ComboBox Grid.Column="2" x:Name="GenreComboBox" 
+                      Padding="10,8"
+                      FontSize="12"
+                      VerticalContentAlignment="Center"
+                      BorderBrush="#CCCCCC" 
+                      BorderThickness="1">
+                <ComboBoxItem IsSelected="True">Tous les genres</ComboBoxItem>
+                <ComboBoxItem>Action</ComboBoxItem>
+                <ComboBoxItem>Aventure</ComboBoxItem>
+                <ComboBoxItem>Comédie</ComboBoxItem>
+                <ComboBoxItem>Drame</ComboBoxItem>
+                <ComboBoxItem>Fantasy</ComboBoxItem>
+                <ComboBoxItem>Horror</ComboBoxItem>
+                <ComboBoxItem>Romance</ComboBoxItem>
+                <ComboBoxItem>Sci-Fi</ComboBoxItem>
+                <ComboBoxItem>Slice of Life</ComboBoxItem>
+                <ComboBoxItem>Sports</ComboBoxItem>
+                <ComboBoxItem>Surnaturel</ComboBoxItem>
+            </ComboBox>
+
+            <!--Type Filter-->
+            <ComboBox Grid.Column="4" x:Name="TypeComboBox" 
+                      Padding="10,8"
+                      FontSize="12"
+                      VerticalContentAlignment="Center"
+                      BorderBrush="#CCCCCC" 
+                      BorderThickness="1">
+                <ComboBoxItem IsSelected="True">Tous les types</ComboBoxItem>
+                <ComboBoxItem>TV</ComboBoxItem>
+                <ComboBoxItem>Movie</ComboBoxItem>
+                <ComboBoxItem>OVA</ComboBoxItem>
+                <ComboBoxItem>ONA</ComboBoxItem>
+                <ComboBoxItem>Special</ComboBoxItem>
+            </ComboBox>
+
+            <!--My List Button-->
+            <Button Grid.Column="6" Content="📋 Ma Liste" 
+                    Background="#2196F3" Foreground="White" 
+                    FontSize="12" Cursor="Hand" Padding="8,5"/>
+        </Grid>
+
+        <!--========== Content Area ==========-->
+        <Grid Grid.Row="2" Background="#FAFAFA">
+            <TextBlock Text="Contenu des animes sera affichés ici" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                       FontSize="16" Foreground="#999999"/>
+        </Grid>
+
+        <!--========== Footer ==========-->
+        <Border Grid.Row="3" Background="#F0F0F0" BorderBrush="#CCCCCC" BorderThickness="0,1,0,0">
+            <TextBlock Text="© 2024 AnimeDiscover - API Jikan" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                       FontSize="12" Foreground="#666666"/>
+        </Border>
     </Grid>
 </Window>
