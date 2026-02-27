@@ -4,6 +4,16 @@
              xmlns:local="clr-namespace:AnimeDiscover"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <!-- Couleurs de texte -->
+        <SolidColorBrush x:Key="TextPrimaryColor" Color="#FFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondaryColor" Color="#8899AA"/>
+
+        <!-- Style carte anime -->
+        <Style x:Key="AnimeCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#002A3F"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
     </Application.Resources>
 </Application>
