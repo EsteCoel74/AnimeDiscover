@@ -4,8 +4,10 @@ using System.Text;
 
 namespace AnimeDiscover.Models
 {
-    public class AnimeData
+    public class AnimeDataResponse
     {
+        public Pagination pagination { get; set; }
+        public List<Datum> data { get; set; }
     }
     public class Aired
     {

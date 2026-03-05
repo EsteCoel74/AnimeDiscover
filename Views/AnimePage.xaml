@@ -5,8 +5,223 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="600" d:DesignWidth="900">
+    <Grid Background="#FAFAFA">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--Back Button-->
+        <Button Grid.Row="0" Content="← Retour" Padding="10,8" Background="#2196F3" 
+                Foreground="White" Cursor="Hand" Margin="20,10,0,10" Width="100" 
+                HorizontalAlignment="Left" Click="BackButton_Click"/>
+
+        <!--Content-->
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Margin="20">
+                <!--Title and Basic Info-->
+                <TextBlock Text="{Binding CurrentAnime.Title}" FontSize="28" FontWeight="Bold" 
+                           Foreground="#333333" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                    <TextBlock Text="{Binding CurrentAnime.Type}" FontSize="14" Foreground="#666666"/>
+                    <TextBlock Text=" | " FontSize="14" Foreground="#999999" Margin="10,0"/>
+                    <TextBlock Text="{Binding CurrentAnime.Year}" FontSize="14" Foreground="#666666"/>
+                    <TextBlock Text=" | " FontSize="14" Foreground="#999999" Margin="10,0"/>
+                    <TextBlock Text="{Binding CurrentAnime.Episodes}" FontSize="14" Foreground="#666666"/>
+                    <TextBlock Text=" eps" FontSize="14" Foreground="#666666"/>
+                    <TextBlock Text=" | " FontSize="14" Foreground="#999999" Margin="10,0"/>
+                    <TextBlock Text="{Binding CurrentAnime.Score, StringFormat='⭐ 0.0'}" 
+                               FontSize="14" Foreground="#FF9800"/>
+                </StackPanel>
+
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="250"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!--Anime Cover Image-->
+                    <Border Grid.Column="0" Background="#E0E0E0" CornerRadius="8" ClipToBounds="True">
+                        <Image Source="{Binding CurrentAnime.ImageUrl}" 
+                               Stretch="UniformToFill" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <!--User Interactions and Info-->
+                    <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                        <TextBlock Text="Vos informations" FontSize="14" FontWeight="Bold" 
+                                   Foreground="#333333" Margin="0,0,0,10"/>
+
+                        <!--Watched Checkbox-->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <CheckBox x:Name="WatchedCheckBox" IsChecked="{Binding CurrentAnime.IsWatched}" 
+                                      VerticalAlignment="Center" Width="20" Height="20" Checked="WatchedCheckBox_Checked" Unchecked="WatchedCheckBox_Checked"/>
+                            <TextBlock Text="Anime vu" FontSize="12" Foreground="#333333" 
+                                       VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </StackPanel>
+
+                        <!--User Score Slider-->
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Ma note" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <Slider x:Name="ScoreSlider" Minimum="0" Maximum="10" 
+                                    Value="{Binding CurrentAnime.UserScore, TargetNullValue=0}"
+                                    Width="200" HorizontalAlignment="Left" Margin="0,0,0,5" ValueChanged="ScoreSlider_ValueChanged"/>
+                            <TextBlock Text="{Binding CurrentAnime.UserScore, StringFormat='Note: {0}'}" 
+                                       FontSize="11" Foreground="#666666"/>
+                        </StackPanel>
+
+                        <!--Statut-->
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Statut" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding CurrentAnime.Status}" FontSize="11" Foreground="#666666" FontWeight="SemiBold"/>
+                        </StackPanel>
+
+                        <!--Saison et Source-->
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Saison" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding CurrentAnime.Season}" FontSize="11" Foreground="#666666" FontWeight="SemiBold"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Source" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <TextBlock Text="{Binding CurrentAnime.Source}" FontSize="11" Foreground="#666666" FontWeight="SemiBold"/>
+                        </StackPanel>
+
+                        <!--Classement-->
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Classement / Popularité" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding CurrentAnime.Rank, StringFormat='Rank: #{0}'}" FontSize="11" Foreground="#666666"/>
+                                <TextBlock Text=" | " FontSize="11" Foreground="#999999" Margin="5,0"/>
+                                <TextBlock Text="{Binding CurrentAnime.Popularity, StringFormat='Pop: #{0}'}" FontSize="11" Foreground="#666666"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!--Score MAL-->
+                        <StackPanel Margin="0,0,0,10">
+                            <TextBlock Text="Score MAL" FontSize="12" Foreground="#333333" Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding CurrentAnime.Score, StringFormat='⭐ {0:F1}'}" FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
+                                <TextBlock Text="{Binding CurrentAnime.ScoredBy, StringFormat=' ({0:N0} votes)'}" FontSize="11" Foreground="#666666" Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!--Genres and Themes-->
+                <Grid Margin="0,20,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                        <TextBlock Text="Genres" FontSize="14" FontWeight="Bold" 
+                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <ItemsControl x:Name="GenresItemsControl">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#E3F2FD" CornerRadius="4" Padding="8,4" Margin="0,2,8,2">
+                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="#1976D2" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Thèmes" FontSize="14" FontWeight="Bold" 
+                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <ItemsControl ItemsSource="{Binding CurrentAnime.Themes}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#FFF3E0" CornerRadius="4" Padding="8,4" Margin="0,2,8,2">
+                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="#F57C00" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+
+                <!--Studios and Producers-->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,20,0">
+                        <TextBlock Text="Studios" FontSize="14" FontWeight="Bold" 
+                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <ItemsControl ItemsSource="{Binding CurrentAnime.Studios}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F3E5F5" CornerRadius="4" Padding="8,4" Margin="0,2,8,2">
+                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="#7B1FA2" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="Producteurs" FontSize="14" FontWeight="Bold" 
+                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <ItemsControl ItemsSource="{Binding CurrentAnime.Producers}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#E8F5E9" CornerRadius="4" Padding="8,4" Margin="0,2,8,2">
+                                        <TextBlock Text="{Binding}" FontSize="11" Foreground="#2E7D32" FontWeight="SemiBold"/>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+
+                <!--Synopsis-->
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Text="Synopsis" FontSize="14" FontWeight="Bold" 
+                               Foreground="#333333" Margin="0,0,0,8"/>
+                    <TextBlock Text="{Binding CurrentAnime.Synopsis}" FontSize="12" 
+                               Foreground="#555555" TextWrapping="Wrap" LineHeight="18"/>
+                </StackPanel>
+
+                <!--Background (si disponible)-->
+                <StackPanel Margin="0,0,0,20">
+                    <TextBlock Text="{Binding CurrentAnime.Background, StringFormat='Background: {0}'}" FontSize="12" 
+                               Foreground="#777777" TextWrapping="Wrap" LineHeight="16" Visibility="Visible"/>
+                </StackPanel>
+
+                <!--Trailer Section (if available)-->
+                <StackPanel x:Name="TrailerSection" Margin="0,0,0,20">
+                    <TextBlock Text="Bande Annonce" FontSize="14" FontWeight="Bold" 
+                               Foreground="#333333" Margin="0,0,0,8"/>
+                    <WebBrowser x:Name="TrailerBrowser" Height="300"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>

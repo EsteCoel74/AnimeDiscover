@@ -1,26 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using AnimeDiscover.Services;
 
 namespace AnimeDiscover.Views
 {
     /// <summary>
-    /// Logique d'interaction pour AnimePage.xaml
+    /// Interaction logic for AnimePage.xaml
     /// </summary>
     public partial class AnimePage : UserControl
     {
         public AnimePage()
         {
             InitializeComponent();
+            this.Loaded += AnimePage_Loaded;
+        }
+
+        private void AnimePage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is AnimeController controller && controller.CurrentAnime != null)
+            {
+                // Load genres
+                var genresControl = FindName("GenresItemsControl") as ItemsControl;
+                if (genresControl != null && controller.CurrentAnime.Genres != null)
+                {
+                    genresControl.ItemsSource = controller.CurrentAnime.Genres;
+                }
+
+                // Load trailer if available
+                var trailerBrowser = FindName("TrailerBrowser") as WebBrowser;
+                if (trailerBrowser != null && !string.IsNullOrEmpty(controller.CurrentAnime.TrailerUrl))
+                {
+                    trailerBrowser.Navigate(controller.CurrentAnime.TrailerUrl);
+                }
+            }
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is AnimeController controller)
+            {
+                controller.GoBack();
+            }
+        }
+
+        private void WatchedCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is AnimeController controller && sender is CheckBox checkBox)
+            {
+                controller.UpdateIsWatched(checkBox.IsChecked ?? false);
+            }
+        }
+
+        private void ScoreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (DataContext is AnimeController controller && sender is Slider slider)
+            {
+                controller.UpdateUserScore((int)slider.Value);
+            }
         }
     }
 }
