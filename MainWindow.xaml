@@ -5,71 +5,104 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnimeDiscover"
         mc:Ignorable="d"
-        Title="MainWindow" Height="650" Width="800">
+        Title="AnimeDiscover" Height="650" Width="1000">
     <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#140E3D" Offset="0.0"/>
+                <GradientStop Color="#8378C7" Offset="1.0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
         <!--========== Top Header Row ==========-->
-        <Grid Grid.Row="0" Background="#F0F0F0">
+        <Grid Grid.Row="0" Background="#1A1A2E">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
 
             <!--Logo and Title-->
-            <TextBlock Grid.Column="0" Text="AnimeDiscover" FontSize="24" FontWeight="Bold" 
-                       Foreground="#333333" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            <Border Grid.Column="0" Margin="10,5,20,5" Background="Transparent" CornerRadius="5" Padding="5">
+                <Image Source="Assets/logo.png" 
+                       VerticalAlignment="Center" HorizontalAlignment="Left" 
+                       Stretch="Uniform" MaxHeight="55"/>
+            </Border>
 
             <!--Settings Button-->
             <Button Grid.Column="1" Content="⚙ Paramètres" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                    Margin="0,0,10,0" Padding="8,5" Background="#E0E0E0" 
-                    BorderBrush="#999999" BorderThickness="1" Cursor="Hand"/>
+                    Margin="0,0,15,0" Padding="12,8" Background="#5F6062" 
+                    BorderBrush="#999999" BorderThickness="1" Cursor="Hand" Foreground="White" FontWeight="Bold"/>
         </Grid>
 
         <!--========== Search and Filter Row ==========-->
-        <Grid Grid.Row="1" Background="#FFFFFF" Margin="10">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="140"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="100"/>
             </Grid.ColumnDefinitions>
 
-            <!--Search Bar-->
-            <Grid Grid.Column="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="50"/>
-                </Grid.ColumnDefinitions>
+            <!--Search Bar with Suggestions-->
+            <Grid Grid.Column="0" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                <TextBox Grid.Column="0" x:Name="SearchTextBox" 
-                         Text=""
-                         Padding="10,8" 
-                         FontSize="14"
-                         VerticalContentAlignment="Center"
-                         BorderBrush="#CCCCCC" 
-                         BorderThickness="1"/>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="50"/>
+                    </Grid.ColumnDefinitions>
 
-                <Button Grid.Column="1" Content="🔍" Margin="5,0,0,0" 
-                        Background="#4CAF50" Foreground="White" 
-                        FontSize="16" Cursor="Hand"/>
+                    <TextBox Grid.Column="0" x:Name="SearchTextBox" 
+                             Padding="12,10" 
+                             FontSize="14"
+                             VerticalContentAlignment="Center"
+                             BorderBrush="#4CAF50" 
+                             BorderThickness="2"
+                             Background="#F5F5F5"/>
+
+                    <Button Grid.Column="1" Content="🔍" Margin="5,0,0,0" 
+                            Background="#4CAF50" Foreground="White" 
+                            FontSize="18" Cursor="Hand" x:Name="SearchButton"/>
+                </Grid>
+
+                <!--Search Suggestions Dropdown-->
+                <ListBox Grid.Row="1" x:Name="SuggestionsListBox" 
+                         Visibility="Collapsed"
+                         MaxHeight="150"
+                         Background="White"
+                         BorderBrush="#CCCCCC"
+                         BorderThickness="1"
+                         Margin="0,2,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Title}" Padding="10,5" Foreground="#333333"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
 
             <!--Genre Filter-->
             <ComboBox Grid.Column="2" x:Name="GenreComboBox" 
-                      Padding="10,8"
+                      Padding="10,10"
                       FontSize="12"
                       VerticalContentAlignment="Center"
                       BorderBrush="#CCCCCC" 
-                      BorderThickness="1">
+                      BorderThickness="1"
+                      Background="White">
                 <ComboBoxItem IsSelected="True">Tous les genres</ComboBoxItem>
                 <ComboBoxItem>Action</ComboBoxItem>
                 <ComboBoxItem>Aventure</ComboBoxItem>
@@ -86,11 +119,12 @@
 
             <!--Type Filter-->
             <ComboBox Grid.Column="4" x:Name="TypeComboBox" 
-                      Padding="10,8"
+                      Padding="10,10"
                       FontSize="12"
                       VerticalContentAlignment="Center"
                       BorderBrush="#CCCCCC" 
-                      BorderThickness="1">
+                      BorderThickness="1"
+                      Background="White">
                 <ComboBoxItem IsSelected="True">Tous les types</ComboBoxItem>
                 <ComboBoxItem>TV</ComboBoxItem>
                 <ComboBoxItem>Movie</ComboBoxItem>
@@ -102,21 +136,17 @@
             <!--My List Button-->
             <Button Grid.Column="6" Content="📋 Ma Liste" 
                     Background="#2196F3" Foreground="White" 
-                    FontSize="12" Cursor="Hand" Padding="8,5"/>
+                    FontSize="12" Cursor="Hand" Padding="10,10" Margin="0,0,10,0" FontWeight="Bold" x:Name="MyListButton"/>
         </Grid>
 
         <!--========== Content Area ==========-->
-        <Grid Grid.Row="2" Background="#FAFAFA">
-            <TextBlock Text="Contenu des animes sera affichés ici" 
-                       HorizontalAlignment="Center" VerticalAlignment="Center" 
-                       FontSize="16" Foreground="#999999"/>
-        </Grid>
+        <ContentControl Grid.Row="2" x:Name="ContentArea" Background="#FAFAFA"/>
 
         <!--========== Footer ==========-->
-        <Border Grid.Row="3" Background="#F0F0F0" BorderBrush="#CCCCCC" BorderThickness="0,1,0,0">
-            <TextBlock Text="© 2024 AnimeDiscover - API Jikan" 
+        <Border Grid.Row="3" Background="#1A1A2E" BorderBrush="#404040" BorderThickness="0,1,0,0">
+            <TextBlock Text="© 2024 AnimeDiscover - Powered by Jikan API" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" 
-                       FontSize="12" Foreground="#666666"/>
+                       FontSize="12" Foreground="#CCCCCC"/>
         </Border>
     </Grid>
 </Window>
