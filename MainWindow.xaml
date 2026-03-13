@@ -14,7 +14,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="60"/>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="78"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
@@ -39,21 +39,25 @@
         </Grid>
 
         <!--========== Search and Filter Row ==========-->
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="140"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="120"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="140"/>
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="1" Margin="12,8,12,8" Padding="10,8"
+                Background="{DynamicResource SurfaceBrush}"
+                BorderBrush="{DynamicResource BorderBrushSoft}"
+                BorderThickness="1" CornerRadius="12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="130"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="145"/>
+                </Grid.ColumnDefinitions>
 
             <!--Search Bar with Suggestions-->
-            <Grid Grid.Column="0" Margin="10">
+            <Grid Grid.Column="0" Margin="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -66,30 +70,29 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBox Grid.Column="0" x:Name="SearchTextBox"
-                             VerticalContentAlignment="Center"/>
+                             VerticalContentAlignment="Center"
+                             MinHeight="36"
+                             ToolTip="Saisis un titre, un genre ou un critère puis appuie sur Entrée"/>
 
                     <Button Grid.Column="1" Content="🔍" Margin="5,0,0,0" 
-                            FontSize="18" x:Name="SearchButton" Style="{StaticResource SuccessButtonStyle}"/>
+                            FontSize="16" MinHeight="36" x:Name="SearchButton" Style="{StaticResource SuccessButtonStyle}"/>
                 </Grid>
 
                 <!--Search Suggestions Dropdown-->
                 <ListBox Grid.Row="1" x:Name="SuggestionsListBox" 
                          Visibility="Collapsed"
                          MaxHeight="150"
-                         Background="White"
-                         BorderBrush="#CCCCCC"
-                         BorderThickness="1"
                          Margin="0,2,0,0">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Title}" Padding="10,5" Foreground="#333333"/>
+                            <TextBlock Text="{Binding Title}" Padding="10,6" Foreground="{DynamicResource TextPrimaryColor}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Grid>
 
             <!--Genre Filter-->
-            <ComboBox Grid.Column="2" x:Name="GenreComboBox" VerticalContentAlignment="Center">
+            <ComboBox Grid.Column="2" x:Name="GenreComboBox" VerticalContentAlignment="Center" MinHeight="36">
                 <ComboBoxItem IsSelected="True">Tous les genres</ComboBoxItem>
                 <ComboBoxItem>Action</ComboBoxItem>
                 <ComboBoxItem>Aventure</ComboBoxItem>
@@ -105,7 +108,7 @@
             </ComboBox>
 
             <!--Type Filter-->
-            <ComboBox Grid.Column="4" x:Name="TypeComboBox" VerticalContentAlignment="Center">
+            <ComboBox Grid.Column="4" x:Name="TypeComboBox" VerticalContentAlignment="Center" MinHeight="36">
                 <ComboBoxItem IsSelected="True">Tous les types</ComboBoxItem>
                 <ComboBoxItem>TV</ComboBoxItem>
                 <ComboBoxItem>Movie</ComboBoxItem>
@@ -116,12 +119,13 @@
 
             <!--My List Button-->
             <Button Grid.Column="6" Content="📋 Ma Liste" 
-                    Margin="0,0,10,0" x:Name="MyListButton" Style="{StaticResource InfoButtonStyle}"/>
+                    MinHeight="36" x:Name="MyListButton" Style="{StaticResource InfoButtonStyle}"/>
 
             <!--AI Assistant Button-->
             <Button Grid.Column="8" Content="🤖 IA Anime"
-                    Margin="0,0,10,0" x:Name="AiAssistantButton" Style="{StaticResource PrimaryButtonStyle}"/>
-        </Grid>
+                    MinHeight="36" x:Name="AiAssistantButton" Style="{StaticResource PrimaryButtonStyle}"/>
+            </Grid>
+        </Border>
 
         <!--========== Content Area ==========-->
         <ContentControl Grid.Row="2" x:Name="ContentArea" Background="#FAFAFA"/>

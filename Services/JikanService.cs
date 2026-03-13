@@ -25,42 +25,16 @@ namespace AnimeDiscover.Services
             {
                 criteria ??= new AnimeApiCriteria();
 
-                var queryParts = new List<string>
+                var result = await ExecuteCriteriaSearchAsync(criteria, includeGenres: true, includeTypeAndStatus: true, includeDatesAndRating: true);
+                if (result.Count == 0)
                 {
-                    "sfw=true",
-                    $"limit={Math.Clamp(criteria.limit <= 0 ? 8 : criteria.limit, 1, 25)}"
-                };
+                    result = await ExecuteCriteriaSearchAsync(criteria, includeGenres: false, includeTypeAndStatus: true, includeDatesAndRating: true);
+                }
+                if (result.Count == 0)
+                {
+                    result = await ExecuteCriteriaSearchAsync(criteria, includeGenres: false, includeTypeAndStatus: false, includeDatesAndRating: false);
+                }
 
-                if (!string.IsNullOrWhiteSpace(criteria.q))
-                    queryParts.Add($"q={Uri.EscapeDataString(criteria.q)}");
-                if (!string.IsNullOrWhiteSpace(criteria.type))
-                    queryParts.Add($"type={Uri.EscapeDataString(criteria.type)}");
-                if (!string.IsNullOrWhiteSpace(criteria.status))
-                    queryParts.Add($"status={Uri.EscapeDataString(criteria.status)}");
-                if (!string.IsNullOrWhiteSpace(criteria.rating))
-                    queryParts.Add($"rating={Uri.EscapeDataString(criteria.rating)}");
-                if (!string.IsNullOrWhiteSpace(criteria.order_by))
-                    queryParts.Add($"order_by={Uri.EscapeDataString(criteria.order_by)}");
-                if (!string.IsNullOrWhiteSpace(criteria.sort))
-                    queryParts.Add($"sort={Uri.EscapeDataString(criteria.sort)}");
-                if (criteria.min_score.HasValue)
-                    queryParts.Add($"min_score={criteria.min_score.Value.ToString(CultureInfo.InvariantCulture)}");
-                if (!string.IsNullOrWhiteSpace(criteria.start_date))
-                    queryParts.Add($"start_date={Uri.EscapeDataString(criteria.start_date)}");
-                if (!string.IsNullOrWhiteSpace(criteria.end_date))
-                    queryParts.Add($"end_date={Uri.EscapeDataString(criteria.end_date)}");
-                if (criteria.genre_ids != null && criteria.genre_ids.Count > 0)
-                    queryParts.Add($"genres={string.Join(",", criteria.genre_ids)}");
-
-                var url = $"{BaseUrl}/anime?{string.Join("&", queryParts)}";
-
-                var response = await GetAsyncWithRetry(url);
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsStringAsync();
-                var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
-
-                var result = root?.data ?? new List<Datum>();
                 if (result.Count == 0 && !string.IsNullOrWhiteSpace(criteria.q))
                 {
                     var fallbackResponse = await GetAsyncWithRetry($"{BaseUrl}/anime?q={Uri.EscapeDataString(criteria.q)}&limit=8&sfw=true");
@@ -82,6 +56,56 @@ namespace AnimeDiscover.Services
 
                 return await GetCurrentSeasonAsync();
             }
+        }
+
+        private async Task<List<Datum>> ExecuteCriteriaSearchAsync(AnimeApiCriteria criteria, bool includeGenres, bool includeTypeAndStatus, bool includeDatesAndRating)
+        {
+            var queryParts = new List<string>
+            {
+                "sfw=true",
+                $"limit={Math.Clamp(criteria.limit <= 0 ? 8 : criteria.limit, 1, 25)}"
+            };
+
+            if (!string.IsNullOrWhiteSpace(criteria.q))
+                queryParts.Add($"q={Uri.EscapeDataString(criteria.q)}");
+
+            if (includeTypeAndStatus)
+            {
+                if (!string.IsNullOrWhiteSpace(criteria.type))
+                    queryParts.Add($"type={Uri.EscapeDataString(criteria.type)}");
+                if (!string.IsNullOrWhiteSpace(criteria.status))
+                    queryParts.Add($"status={Uri.EscapeDataString(criteria.status)}");
+            }
+
+            if (includeDatesAndRating)
+            {
+                if (!string.IsNullOrWhiteSpace(criteria.rating))
+                    queryParts.Add($"rating={Uri.EscapeDataString(criteria.rating)}");
+                if (criteria.min_score.HasValue)
+                    queryParts.Add($"min_score={criteria.min_score.Value.ToString(CultureInfo.InvariantCulture)}");
+                if (!string.IsNullOrWhiteSpace(criteria.start_date))
+                    queryParts.Add($"start_date={Uri.EscapeDataString(criteria.start_date)}");
+                if (!string.IsNullOrWhiteSpace(criteria.end_date))
+                    queryParts.Add($"end_date={Uri.EscapeDataString(criteria.end_date)}");
+            }
+
+            if (!string.IsNullOrWhiteSpace(criteria.order_by))
+                queryParts.Add($"order_by={Uri.EscapeDataString(criteria.order_by)}");
+            if (!string.IsNullOrWhiteSpace(criteria.sort))
+                queryParts.Add($"sort={Uri.EscapeDataString(criteria.sort)}");
+
+            if (includeGenres && criteria.genre_ids != null && criteria.genre_ids.Count > 0)
+            {
+                queryParts.Add($"genres={string.Join(",", criteria.genre_ids)}");
+            }
+
+            var url = $"{BaseUrl}/anime?{string.Join("&", queryParts)}";
+            var response = await GetAsyncWithRetry(url);
+            response.EnsureSuccessStatusCode();
+
+            var json = await response.Content.ReadAsStringAsync();
+            var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
+            return root?.data ?? new List<Datum>();
         }
 
         public async Task<List<Datum>> GetCurrentSeasonAsync()
@@ -149,7 +173,13 @@ namespace AnimeDiscover.Services
             var response = await _httpClient.GetAsync(url);
             if ((int)response.StatusCode == 429)
             {
-                await Task.Delay(1200);
+                var retryDelayMs = 1200;
+                if (response.Headers.RetryAfter?.Delta != null)
+                {
+                    retryDelayMs = (int)Math.Max(800, response.Headers.RetryAfter.Delta.Value.TotalMilliseconds);
+                }
+
+                await Task.Delay(retryDelayMs);
                 response = await _httpClient.GetAsync(url);
             }
 

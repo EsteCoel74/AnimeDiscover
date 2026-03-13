@@ -6,16 +6,15 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900">
-    <Grid Background="#FAFAFA">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!--Back Button-->
-        <Button Grid.Row="0" Content="← Retour" Padding="10,8" Background="#2196F3" 
-                Foreground="White" Cursor="Hand" Margin="20,10,0,10" Width="100" 
-                HorizontalAlignment="Left" Click="BackButton_Click"/>
+        <Button Grid.Row="0" Content="← Retour" Margin="20,10,0,10" Width="110" 
+                HorizontalAlignment="Left" Click="BackButton_Click" Style="{StaticResource InfoButtonStyle}"/>
 
         <!--Content-->
         <ScrollViewer Grid.Row="1">
@@ -43,7 +42,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!--Anime Cover Image-->
-                    <Border Grid.Column="0" Background="#E0E0E0" CornerRadius="8" ClipToBounds="True">
+                    <Border Grid.Column="0" Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8" ClipToBounds="True">
                         <Image Source="{Binding CurrentAnime.ImageUrl}" 
                                Stretch="UniformToFill" Height="350" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Border>
@@ -222,12 +221,7 @@
                     <Button x:Name="OpenTrailerButton"
                             Content="▶ Ouvrir la bande annonce"
                             Width="220"
-                            Padding="10,8"
-                            Background="#E53935"
-                            Foreground="White"
-                            BorderBrush="#C62828"
-                            BorderThickness="1"
-                            Cursor="Hand"
+                            Style="{StaticResource DangerButtonStyle}"
                             Click="OpenTrailerButton_Click"/>
                 </StackPanel>
             </StackPanel>

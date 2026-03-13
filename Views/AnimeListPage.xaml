@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="#FAFAFA">
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -14,10 +14,9 @@
 
         <!--Header with Back Button-->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,20,0,10">
-            <Button Content="← Retour" Padding="10,8" Background="#2196F3" Foreground="White" 
-                    Cursor="Hand" x:Name="BackButton" Click="BackButton_Click"/>
+            <Button Content="← Retour" x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource InfoButtonStyle}"/>
             <TextBlock Text="Ma Liste d'Animes" FontSize="20" FontWeight="Bold" 
-                       Foreground="#333333" VerticalAlignment="Center" Margin="20,0,0,0"/>
+                       Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" Margin="20,0,0,0"/>
         </StackPanel>
 
         <!--Anime List Grid-->
@@ -25,7 +24,6 @@
                   ItemsSource="{Binding UserAnimes}"
                   AutoGenerateColumns="False"
                   CanUserAddRows="False"
-                  Background="White"
                   Margin="20">
 
             <DataGrid.Columns>
