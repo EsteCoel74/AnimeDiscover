@@ -132,7 +132,7 @@ namespace AnimeDiscover.Services
             try
             {
                 var encodedQuery = Uri.EscapeDataString(query);
-                var response = await GetAsyncWithRetry($"{BaseUrl}/anime?q={encodedQuery}&limit=8&sfw");
+                var response = await GetAsyncWithRetry($"{BaseUrl}/anime?q={encodedQuery}&limit=25&sfw");
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
