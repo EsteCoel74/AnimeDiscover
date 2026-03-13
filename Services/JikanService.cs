@@ -54,18 +54,33 @@ namespace AnimeDiscover.Services
 
                 var url = $"{BaseUrl}/anime?{string.Join("&", queryParts)}";
 
-                var response = await _httpClient.GetAsync(url);
+                var response = await GetAsyncWithRetry(url);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
                 var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
 
-                return root?.data ?? new List<Datum>();
+                var result = root?.data ?? new List<Datum>();
+                if (result.Count == 0 && !string.IsNullOrWhiteSpace(criteria.q))
+                {
+                    var fallbackResponse = await GetAsyncWithRetry($"{BaseUrl}/anime?q={Uri.EscapeDataString(criteria.q)}&limit=8&sfw=true");
+                    fallbackResponse.EnsureSuccessStatusCode();
+                    var fallbackJson = await fallbackResponse.Content.ReadAsStringAsync();
+                    var fallbackRoot = JsonSerializer.Deserialize<Root>(fallbackJson, GetJsonOptions());
+                    result = fallbackRoot?.data ?? new List<Datum>();
+                }
+
+                return result;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Erreur recherche par critères API: {ex.Message}");
-                return new List<Datum>();
+                if (!string.IsNullOrWhiteSpace(criteria?.q))
+                {
+                    return await SearchAnimeAsync(criteria.q);
+                }
+
+                return await GetCurrentSeasonAsync();
             }
         }
 

@@ -84,7 +84,7 @@ namespace AnimeDiscover.Views
             try
             {
                 var aiDecision = await BuildCriteriaWithAiAsync(userPrompt);
-                var recommendations = await GetAnimeRecommendationsAsync(aiDecision.criteria);
+                var recommendations = await GetAnimeRecommendationsAsync(aiDecision.criteria, userPrompt);
 
                 if (recommendations.Count == 0)
                 {
@@ -123,14 +123,28 @@ namespace AnimeDiscover.Views
             }
         }
 
-        private async Task<List<Datum>> GetAnimeRecommendationsAsync(AnimeApiCriteria criteria)
+        private async Task<List<Datum>> GetAnimeRecommendationsAsync(AnimeApiCriteria criteria, string userPrompt)
         {
             var collected = await _jikanService.SearchAnimeByCriteriaAsync(criteria);
 
             if (collected.Count == 0)
             {
-                var fallback = await _jikanService.SearchAnimeAsync(criteria?.q ?? string.Empty);
-                collected.AddRange(fallback.Where(x => x != null));
+                foreach (var query in BuildFallbackQueries(criteria?.q, userPrompt))
+                {
+                    var fallback = await _jikanService.SearchAnimeAsync(query);
+                    foreach (var anime in fallback.Where(x => x != null))
+                    {
+                        if (collected.All(x => x.mal_id != anime.mal_id))
+                        {
+                            collected.Add(anime);
+                        }
+                    }
+
+                    if (collected.Count >= 8)
+                    {
+                        break;
+                    }
+                }
             }
 
             if (collected.Count == 0)
@@ -144,6 +158,43 @@ namespace AnimeDiscover.Views
                 .GroupBy(a => a.mal_id)
                 .Select(g => g.First())
                 .OrderByDescending(a => a.score ?? 0)
+                .Take(8)
+                .ToList();
+        }
+
+        private static List<string> BuildFallbackQueries(string criteriaQuery, string userPrompt)
+        {
+            var queries = new List<string>();
+            if (!string.IsNullOrWhiteSpace(criteriaQuery))
+            {
+                queries.Add(criteriaQuery.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(userPrompt))
+            {
+                queries.Add(userPrompt.Trim());
+            }
+
+            var source = string.Join(" ", queries);
+            var stopWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "je", "veux", "un", "une", "des", "de", "du", "la", "le", "les", "et", "ou", "avec",
+                "pour", "qui", "que", "dans", "sur", "anime", "animes", "manga", "genre", "types", "type"
+            };
+
+            var keywords = Regex.Split(source, "[^a-zA-Z0-9+\\-]+")
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Where(x => x.Length >= 3)
+                .Where(x => !stopWords.Contains(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(5)
+                .ToList();
+
+            queries.AddRange(keywords);
+
+            return queries
+                .Where(q => !string.IsNullOrWhiteSpace(q))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Take(8)
                 .ToList();
         }
