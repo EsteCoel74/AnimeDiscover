@@ -123,13 +123,11 @@ namespace AnimeDiscover.Views
         private async Task<List<Datum>> GetFilteredRecommendationsAsync(string userPrompt)
         {
             const int maxResults = 20;
-            var intent = DetectIntent(userPrompt);
-            var queries = BuildQueries(userPrompt, intent);
+            var info = ExtractPromptInfo(userPrompt);
 
             var collected = new List<Datum>();
 
-            // 0) Recherche API orientée critères (plus précise que la recherche texte brute)
-            var criteriaResults = await _jikanService.SearchAnimeByCriteriaAsync(BuildIntentCriteria(userPrompt, intent));
+            var criteriaResults = await _jikanService.SearchAnimeByCriteriaAsync(BuildSearchCriteria(userPrompt, info));
             foreach (var anime in criteriaResults.Where(x => x != null))
             {
                 if (collected.All(x => x.mal_id != anime.mal_id))
@@ -138,7 +136,7 @@ namespace AnimeDiscover.Views
                 }
             }
 
-            foreach (var query in queries)
+            foreach (var query in BuildQueries(userPrompt, info))
             {
                 var results = await _jikanService.SearchAnimeAsync(query);
                 foreach (var anime in results.Where(x => x != null))
@@ -149,7 +147,7 @@ namespace AnimeDiscover.Views
                     }
                 }
 
-                if (collected.Count >= 60)
+                if (collected.Count >= 80)
                 {
                     break;
                 }
@@ -161,8 +159,8 @@ namespace AnimeDiscover.Views
             }
 
             var strict = collected
-                .Where(a => MatchesStrictCriteria(a, userPrompt, intent))
-                .OrderByDescending(a => GetRelevanceScore(a, userPrompt, intent))
+                .Where(a => MatchesStrictCriteria(a, info))
+                .OrderByDescending(a => GetRelevanceScore(a, info))
                 .ThenByDescending(a => a.score ?? 0)
                 .Take(maxResults)
                 .ToList();
@@ -172,10 +170,9 @@ namespace AnimeDiscover.Views
                 return strict;
             }
 
-            // Fallback intelligent: garder un filtrage minimum au lieu de renvoyer vide.
             var relaxed = collected
-                .Where(a => GetRelevanceScore(a, userPrompt, intent) >= (intent == Intent.Automotive ? 8 : 5))
-                .OrderByDescending(a => GetRelevanceScore(a, userPrompt, intent))
+                .Where(a => GetRelevanceScore(a, info) >= 12)
+                .OrderByDescending(a => GetRelevanceScore(a, info))
                 .ThenByDescending(a => a.score ?? 0)
                 .Take(maxResults)
                 .ToList();
@@ -183,31 +180,22 @@ namespace AnimeDiscover.Views
             return relaxed;
         }
 
-        private static AnimeApiCriteria BuildIntentCriteria(string userPrompt, Intent intent)
+        private static AnimeApiCriteria BuildSearchCriteria(string userPrompt, PromptInfo info)
         {
-            if (intent == Intent.Automotive)
-            {
-                return new AnimeApiCriteria
-                {
-                    q = "racing",
-                    genre_ids = new List<int> { 3, 30 }, // Cars + Sports
-                    order_by = "score",
-                    sort = "desc",
-                    limit = 25
-                };
-            }
-
-            var keywords = BuildKeywordQuery(userPrompt);
+            var keywordQuery = BuildKeywordQuery(userPrompt, info);
             return new AnimeApiCriteria
             {
-                q = string.IsNullOrWhiteSpace(keywords) ? userPrompt : keywords,
+                q = string.IsNullOrWhiteSpace(keywordQuery) ? userPrompt : keywordQuery,
+                type = info.Type,
+                status = info.Status,
+                genre_ids = info.GenreIds,
                 order_by = "score",
                 sort = "desc",
                 limit = 25
             };
         }
 
-        private static List<string> BuildQueries(string userPrompt, Intent intent)
+        private static List<string> BuildQueries(string userPrompt, PromptInfo info)
         {
             var queries = new List<string>();
 
@@ -216,36 +204,23 @@ namespace AnimeDiscover.Views
                 queries.Add(userPrompt.Trim());
             }
 
-            var keywords = BuildKeywordQuery(userPrompt);
-            if (!string.IsNullOrWhiteSpace(keywords))
+            var keywordQuery = BuildKeywordQuery(userPrompt, info);
+            if (!string.IsNullOrWhiteSpace(keywordQuery))
             {
-                queries.Add(keywords);
+                queries.Add(keywordQuery);
             }
 
-            if (intent == Intent.Automotive)
-            {
-                queries.AddRange(new[]
-                {
-                    "Initial D",
-                    "Initial D First Stage",
-                    "Initial D Second Stage",
-                    "Initial D Third Stage",
-                    "Initial D Fourth Stage",
-                    "Initial D Fifth Stage",
-                    "MF Ghost",
-                    "Wangan Midnight",
-                    "Capeta",
-                    "Redline"
-                });
-            }
+            queries.AddRange(info.SeedQueries);
+            queries.AddRange(info.RequiredTerms.Take(4));
 
             return queries
                 .Where(q => !string.IsNullOrWhiteSpace(q))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(15)
                 .ToList();
         }
 
-        private static bool MatchesStrictCriteria(Datum anime, string prompt, Intent intent)
+        private static bool MatchesStrictCriteria(Datum anime, PromptInfo info)
         {
             var haystack = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.title_japanese} {anime?.synopsis} {string.Join(' ', anime?.Genres ?? new List<string>())} {string.Join(' ', anime?.Themes ?? new List<string>())}");
             if (string.IsNullOrWhiteSpace(haystack))
@@ -253,69 +228,79 @@ namespace AnimeDiscover.Views
                 return false;
             }
 
-            if (intent == Intent.Automotive)
+            if (!string.IsNullOrWhiteSpace(info.Type) && !string.Equals(anime?.type, info.Type, StringComparison.OrdinalIgnoreCase))
             {
-                var names = new[]
-                {
-                    NormalizeText(anime?.title),
-                    NormalizeText(anime?.title_english),
-                    NormalizeText(anime?.title_japanese)
-                };
-
-                var knownFranchise = names.Any(n => !string.IsNullOrWhiteSpace(n) &&
-                    (n.Contains("initial d") || n.Contains("mf ghost") || n.Contains("wangan") || n.Contains("capeta") || n.Contains("redline")));
-
-                var hasCarsGenre = (anime?.Genres ?? new List<string>())
-                    .Any(g => string.Equals(g, "Cars", StringComparison.OrdinalIgnoreCase));
-
-                var strongVehicleTokens = new[]
-                {
-                    "car", "cars", "automobile", "drift", "motorsport", "street racing", "rally", "touge", "formula 1", "f1"
-                };
-
-                var hasStrongVehicleSignal = strongVehicleTokens
-                    .Any(t => haystack.Contains(t, StringComparison.OrdinalIgnoreCase));
-
-                // "racing"/"race" seul n'est pas suffisant (trop de faux positifs)
-                return knownFranchise || hasCarsGenre || hasStrongVehicleSignal;
+                return false;
             }
 
-            var promptKeywords = BuildPromptKeywords(prompt);
-            if (promptKeywords.Count == 0)
+            if (!string.IsNullOrWhiteSpace(info.Status) && !string.Equals(anime?.status, info.Status, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (info.GenreIds.Count > 0)
+            {
+                var animeGenreIds = (anime?.genres ?? new List<Genre>()).Select(g => g.mal_id).ToHashSet();
+                if (!info.GenreIds.Any(animeGenreIds.Contains))
+                {
+                    return false;
+                }
+            }
+
+            var titleHaystack = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.title_japanese}");
+            if (info.RequiredTerms.Count == 0)
             {
                 return true;
             }
 
-            var matched = promptKeywords.Count(k => haystack.Contains(k, StringComparison.OrdinalIgnoreCase));
-            var required = Math.Min(2, Math.Max(1, promptKeywords.Count));
-            return matched >= required;
+            var titleMatches = info.RequiredTerms.Count(k => titleHaystack.Contains(k, StringComparison.OrdinalIgnoreCase));
+            var textMatches = info.RequiredTerms.Count(k => haystack.Contains(k, StringComparison.OrdinalIgnoreCase));
+
+            var requiredTextMatches = info.RequiredTerms.Count >= 4 ? 2 : 1;
+            return titleMatches >= 1 || textMatches >= requiredTextMatches;
         }
 
-        private static int GetRelevanceScore(Datum anime, string prompt, Intent intent)
+        private static int GetRelevanceScore(Datum anime, PromptInfo info)
         {
-            var haystack = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.synopsis}");
-            if (string.IsNullOrWhiteSpace(haystack))
+            var titleHaystack = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.title_japanese}");
+            var textHaystack = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.synopsis} {string.Join(' ', anime?.Genres ?? new List<string>())}");
+            if (string.IsNullOrWhiteSpace(textHaystack))
             {
                 return 0;
             }
 
             var score = 0;
-            var promptKeywords = BuildPromptKeywords(prompt);
-            foreach (var keyword in promptKeywords)
+            foreach (var keyword in info.RequiredTerms)
             {
-                if (haystack.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                if (titleHaystack.Contains(keyword, StringComparison.OrdinalIgnoreCase))
                 {
-                    score += 10;
+                    score += 20;
+                }
+
+                if (textHaystack.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+                {
+                    score += 8;
                 }
             }
 
-            if (intent == Intent.Automotive)
+            if (!string.IsNullOrWhiteSpace(info.Type) && string.Equals(anime?.type, info.Type, StringComparison.OrdinalIgnoreCase))
             {
-                foreach (var token in new[] { "initial d", "mf ghost", "wangan", "capeta", "redline", "drift", "automobile", "car", "cars", "motorsport", "f1" })
+                score += 10;
+            }
+
+            if (!string.IsNullOrWhiteSpace(info.Status) && string.Equals(anime?.status, info.Status, StringComparison.OrdinalIgnoreCase))
+            {
+                score += 10;
+            }
+
+            if (info.GenreIds.Count > 0)
+            {
+                var animeGenreIds = (anime?.genres ?? new List<Genre>()).Select(g => g.mal_id).ToHashSet();
+                foreach (var genreId in info.GenreIds)
                 {
-                    if (haystack.Contains(token, StringComparison.OrdinalIgnoreCase))
+                    if (animeGenreIds.Contains(genreId))
                     {
-                        score += 12;
+                        score += 14;
                     }
                 }
             }
@@ -323,9 +308,9 @@ namespace AnimeDiscover.Views
             return score;
         }
 
-        private static string BuildKeywordQuery(string input)
+        private static string BuildKeywordQuery(string input, PromptInfo info)
         {
-            var keywords = BuildPromptKeywords(input);
+            var keywords = info.RequiredTerms.Count > 0 ? info.RequiredTerms : BuildPromptKeywords(input);
             return keywords.Count == 0 ? null : string.Join(" ", keywords.Take(6));
         }
 
@@ -346,19 +331,70 @@ namespace AnimeDiscover.Views
                 .ToList();
         }
 
-        private static Intent DetectIntent(string prompt)
+        private static PromptInfo ExtractPromptInfo(string prompt)
         {
             var normalized = NormalizeText(prompt);
-            var automotive = normalized.Contains("course automobile")
-                             || normalized.Contains("automobile")
-                             || normalized.Contains("voiture")
-                             || normalized.Contains("racing")
-                             || normalized.Contains("motorsport")
-                             || normalized.Contains("drift")
-                             || normalized.Contains("f1")
-                             || normalized.Contains("formula");
+            var info = new PromptInfo();
 
-            return automotive ? Intent.Automotive : Intent.Generic;
+            if (Regex.IsMatch(normalized, "\\b(film|movie)\\b")) info.Type = "movie";
+            else if (Regex.IsMatch(normalized, "\\b(ova)\\b")) info.Type = "ova";
+            else if (Regex.IsMatch(normalized, "\\b(ona)\\b")) info.Type = "ona";
+            else if (Regex.IsMatch(normalized, "\\b(tv|serie|série)\\b")) info.Type = "tv";
+
+            if (Regex.IsMatch(normalized, "\\b(en cours|airing|actuel)\\b")) info.Status = "airing";
+            else if (Regex.IsMatch(normalized, "\\b(termin[eé]|fini|complete)\\b")) info.Status = "complete";
+            else if (Regex.IsMatch(normalized, "\\b(a venir|à venir|prochain|upcoming)\\b")) info.Status = "upcoming";
+
+            var genreAlias = new Dictionary<string, (int id, string canonical)>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["action"] = (1, "action"),
+                ["aventure"] = (2, "adventure"),
+                ["adventure"] = (2, "adventure"),
+                ["automobile"] = (3, "cars"),
+                ["voiture"] = (3, "cars"),
+                ["cars"] = (3, "cars"),
+                ["racing"] = (3, "cars"),
+                ["comedie"] = (4, "comedy"),
+                ["comédie"] = (4, "comedy"),
+                ["drame"] = (8, "drama"),
+                ["drama"] = (8, "drama"),
+                ["fantasy"] = (10, "fantasy"),
+                ["horreur"] = (14, "horror"),
+                ["horror"] = (14, "horror"),
+                ["romance"] = (22, "romance"),
+                ["science fiction"] = (24, "sci-fi"),
+                ["sci-fi"] = (24, "sci-fi"),
+                ["sports"] = (30, "sports"),
+                ["sport"] = (30, "sports"),
+                ["slice of life"] = (36, "slice of life"),
+                ["surnaturel"] = (37, "supernatural"),
+                ["supernatural"] = (37, "supernatural")
+            };
+
+            foreach (var kvp in genreAlias)
+            {
+                if (normalized.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!info.GenreIds.Contains(kvp.Value.id)) info.GenreIds.Add(kvp.Value.id);
+                    if (!info.RequiredTerms.Contains(kvp.Value.canonical)) info.RequiredTerms.Add(kvp.Value.canonical);
+                }
+            }
+
+            var promptTerms = BuildPromptKeywords(prompt);
+            foreach (var term in promptTerms.Take(6))
+            {
+                if (!info.RequiredTerms.Contains(term))
+                {
+                    info.RequiredTerms.Add(term);
+                }
+            }
+
+            if (info.GenreIds.Contains(3))
+            {
+                info.SeedQueries.AddRange(new[] { "Initial D", "MF Ghost", "Wangan Midnight", "Capeta", "Redline" });
+            }
+
+            return info;
         }
 
         private static string NormalizeText(string input)
@@ -403,10 +439,13 @@ namespace AnimeDiscover.Views
             public ObservableCollection<Datum> Recommendations { get; init; } = new();
         }
 
-        private enum Intent
+        private sealed class PromptInfo
         {
-            Generic,
-            Automotive
+            public string Type { get; set; }
+            public string Status { get; set; }
+            public List<int> GenreIds { get; } = new();
+            public List<string> RequiredTerms { get; } = new();
+            public List<string> SeedQueries { get; } = new();
         }
     }
 }
