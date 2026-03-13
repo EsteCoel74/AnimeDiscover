@@ -5,13 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnimeDiscover"
         mc:Ignorable="d"
-        Title="AnimeDiscover" Height="650" Width="1000">
+        Title="AnimeDiscover" Height="650" Width="1000"
+        Background="{DynamicResource WindowBackgroundBrush}">
     <Grid>
         <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#140E3D" Offset="0.0"/>
-                <GradientStop Color="#8378C7" Offset="1.0"/>
-            </LinearGradientBrush>
+            <DynamicResource ResourceKey="MainGradientBrush"/>
         </Grid.Background>
 
         <Grid.RowDefinitions>
@@ -22,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <!--========== Top Header Row ==========-->
-        <Grid Grid.Row="0" Background="#1A1A2E">
+        <Grid Grid.Row="0" Background="{DynamicResource HeaderBackgroundBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="100"/>
@@ -37,8 +35,7 @@
 
             <!--Settings Button-->
             <Button Grid.Column="1" Content="⚙ Paramètres" HorizontalAlignment="Right" VerticalAlignment="Center" 
-                    Margin="0,0,15,0" Padding="12,8" Background="#5F6062" 
-                    BorderBrush="#999999" BorderThickness="1" Cursor="Hand" Foreground="White" FontWeight="Bold"/>
+                    Margin="0,0,15,0" Style="{StaticResource PrimaryButtonStyle}"/>
         </Grid>
 
         <!--========== Search and Filter Row ==========-->
@@ -51,6 +48,8 @@
                 <ColumnDefinition Width="140"/>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="140"/>
             </Grid.ColumnDefinitions>
 
             <!--Search Bar with Suggestions-->
@@ -66,17 +65,11 @@
                         <ColumnDefinition Width="50"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" x:Name="SearchTextBox" 
-                             Padding="12,10" 
-                             FontSize="14"
-                             VerticalContentAlignment="Center"
-                             BorderBrush="#4CAF50" 
-                             BorderThickness="2"
-                             Background="#F5F5F5"/>
+                    <TextBox Grid.Column="0" x:Name="SearchTextBox"
+                             VerticalContentAlignment="Center"/>
 
                     <Button Grid.Column="1" Content="🔍" Margin="5,0,0,0" 
-                            Background="#4CAF50" Foreground="White" 
-                            FontSize="18" Cursor="Hand" x:Name="SearchButton"/>
+                            FontSize="18" x:Name="SearchButton" Style="{StaticResource SuccessButtonStyle}"/>
                 </Grid>
 
                 <!--Search Suggestions Dropdown-->
@@ -96,13 +89,7 @@
             </Grid>
 
             <!--Genre Filter-->
-            <ComboBox Grid.Column="2" x:Name="GenreComboBox" 
-                      Padding="10,10"
-                      FontSize="12"
-                      VerticalContentAlignment="Center"
-                      BorderBrush="#CCCCCC" 
-                      BorderThickness="1"
-                      Background="White">
+            <ComboBox Grid.Column="2" x:Name="GenreComboBox" VerticalContentAlignment="Center">
                 <ComboBoxItem IsSelected="True">Tous les genres</ComboBoxItem>
                 <ComboBoxItem>Action</ComboBoxItem>
                 <ComboBoxItem>Aventure</ComboBoxItem>
@@ -118,13 +105,7 @@
             </ComboBox>
 
             <!--Type Filter-->
-            <ComboBox Grid.Column="4" x:Name="TypeComboBox" 
-                      Padding="10,10"
-                      FontSize="12"
-                      VerticalContentAlignment="Center"
-                      BorderBrush="#CCCCCC" 
-                      BorderThickness="1"
-                      Background="White">
+            <ComboBox Grid.Column="4" x:Name="TypeComboBox" VerticalContentAlignment="Center">
                 <ComboBoxItem IsSelected="True">Tous les types</ComboBoxItem>
                 <ComboBoxItem>TV</ComboBoxItem>
                 <ComboBoxItem>Movie</ComboBoxItem>
@@ -135,15 +116,18 @@
 
             <!--My List Button-->
             <Button Grid.Column="6" Content="📋 Ma Liste" 
-                    Background="#2196F3" Foreground="White" 
-                    FontSize="12" Cursor="Hand" Padding="10,10" Margin="0,0,10,0" FontWeight="Bold" x:Name="MyListButton"/>
+                    Margin="0,0,10,0" x:Name="MyListButton" Style="{StaticResource InfoButtonStyle}"/>
+
+            <!--AI Assistant Button-->
+            <Button Grid.Column="8" Content="🤖 IA Anime"
+                    Margin="0,0,10,0" x:Name="AiAssistantButton" Style="{StaticResource PrimaryButtonStyle}"/>
         </Grid>
 
         <!--========== Content Area ==========-->
         <ContentControl Grid.Row="2" x:Name="ContentArea" Background="#FAFAFA"/>
 
         <!--========== Footer ==========-->
-        <Border Grid.Row="3" Background="#1A1A2E" BorderBrush="#404040" BorderThickness="0,1,0,0">
+        <Border Grid.Row="3" Background="{DynamicResource HeaderBackgroundBrush}" BorderBrush="#404040" BorderThickness="0,1,0,0">
             <TextBlock Text="© 2024 AnimeDiscover - Powered by Jikan API" 
                        HorizontalAlignment="Center" VerticalAlignment="Center" 
                        FontSize="12" Foreground="#CCCCCC"/>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using AnimeDiscover.Services;
 
 namespace AnimeDiscover
@@ -31,8 +32,10 @@ namespace AnimeDiscover
 
             // Wire up event handlers
             SearchTextBox.TextChanged += SearchTextBox_TextChanged;
+            SearchTextBox.KeyDown += SearchTextBox_KeyDown;
             SearchButton.Click += SearchButton_Click;
             MyListButton.Click += MyListButton_Click;
+            AiAssistantButton.Click += AiAssistantButton_Click;
             GenreComboBox.SelectionChanged += FilterComboBox_SelectionChanged;
             TypeComboBox.SelectionChanged += FilterComboBox_SelectionChanged;
             SuggestionsListBox.MouseDoubleClick += SuggestionsListBox_MouseDoubleClick;
@@ -94,15 +97,44 @@ namespace AnimeDiscover
             );
         }
 
-        private void SearchButton_Click(object sender, RoutedEventArgs e)
+        private async void SearchButton_Click(object sender, RoutedEventArgs e)
+        {
+            await PerformSearchAsync();
+        }
+
+        private async void SearchTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                await PerformSearchAsync();
+            }
+        }
+
+        private async System.Threading.Tasks.Task PerformSearchAsync()
         {
             SuggestionsListBox.Visibility = Visibility.Collapsed;
-            ApplyFilters();
+
+            var homeController = _mainController?.HomeController;
+            if (homeController == null) return;
+
+            var selectedGenre = GenreComboBox.SelectedItem as ComboBoxItem;
+            var selectedType = TypeComboBox.SelectedItem as ComboBoxItem;
+
+            var genreText = selectedGenre?.Content?.ToString() ?? "Tous les genres";
+            var typeText = selectedType?.Content?.ToString() ?? "Tous les types";
+
+            await homeController.SearchAndApplyAsync(SearchTextBox.Text?.Trim(), genreText, typeText);
         }
 
         private void MyListButton_Click(object sender, RoutedEventArgs e)
         {
             _mainController?.HomeController?.OpenMyList();
+        }
+
+        private void AiAssistantButton_Click(object sender, RoutedEventArgs e)
+        {
+            _mainController?.ShowAiConversation();
         }
 
         private void FilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -112,7 +144,7 @@ namespace AnimeDiscover
 
         private void SuggestionsListBox_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (SuggestionsListBox.SelectedItem is Models.Anime selectedAnime)
+            if (SuggestionsListBox.SelectedItem is Models.Datum selectedAnime)
             {
                 _mainController?.HomeController?.SelectAnime(selectedAnime);
                 SuggestionsListBox.Visibility = Visibility.Collapsed;

@@ -1,0 +1,107 @@
+<UserControl x:Class="AnimeDiscover.Views.AiConversationPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AnimeDiscover.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="900">
+    <Grid Background="#FAFAFA" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+            <TextBlock Text="🤖 Assistant IA Anime" FontSize="24" FontWeight="Bold" Foreground="#333333"/>
+            <TextBlock Text="Décris tes critères (genre, ambiance, durée, époque, etc.) pour recevoir des recommandations." 
+                       FontSize="12" Foreground="#666666" Margin="0,8,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="10">
+            <ScrollViewer x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Messages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border x:Name="MessageBubble"
+                                    Background="#F5F5F5"
+                                    CornerRadius="8"
+                                    Padding="10"
+                                    Margin="0,6"
+                                    HorizontalAlignment="Left"
+                                    MaxWidth="700">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="#555555"/>
+                                    <TextBlock Text="{Binding Text}" Margin="0,4,0,0" TextWrapping="Wrap" Foreground="#222222"/>
+
+                                    <ItemsControl ItemsSource="{Binding Recommendations}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Tag="{Binding}" Click="RecommendationButton_Click"
+                                                        HorizontalContentAlignment="Left"
+                                                        Background="#FFFFFF"
+                                                        BorderBrush="#D0D7DE"
+                                                        BorderThickness="1"
+                                                        Padding="8"
+                                                        Margin="0,4,0,0"
+                                                        Cursor="Hand">
+                                                    <StackPanel>
+                                                        <TextBlock Text="{Binding title}" FontWeight="SemiBold" Foreground="#1F2328" TextWrapping="Wrap"/>
+                                                        <TextBlock Foreground="#57606A" FontSize="11" Margin="0,2,0,0">
+                                                            <Run Text="Type: "/>
+                                                            <Run Text="{Binding type}"/>
+                                                            <Run Text="  •  Score: "/>
+                                                            <Run Text="{Binding score, StringFormat={}{0:0.0}}"/>
+                                                            <Run Text="  •  Année: "/>
+                                                            <Run Text="{Binding year}"/>
+                                                        </TextBlock>
+                                                    </StackPanel>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsUser}" Value="True">
+                                    <Setter TargetName="MessageBubble" Property="Background" Value="#E3F2FD"/>
+                                    <Setter TargetName="MessageBubble" Property="HorizontalAlignment" Value="Right"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <Grid Grid.Row="2" Margin="0,15,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="120"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBox Grid.Column="0"
+                     x:Name="PromptTextBox"
+                     MinHeight="44"
+                     MaxHeight="120"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     VerticalScrollBarVisibility="Auto"
+                     Padding="10"
+                     BorderBrush="#CCCCCC"
+                     BorderThickness="1"
+                     PreviewKeyDown="PromptTextBox_PreviewKeyDown"/>
+
+            <Button Grid.Column="2"
+                    x:Name="SendButton"
+                    Content="Envoyer"
+                    Background="#4CAF50"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Cursor="Hand"
+                    Click="SendButton_Click"/>
+        </Grid>
+    </Grid>
+</UserControl>

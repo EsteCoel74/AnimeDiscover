@@ -14,12 +14,12 @@ namespace AnimeDiscover.Services
         private readonly UserDataService _userDataService;
         private readonly Random _random = new Random();
 
-        public ObservableCollection<Anime> Animes { get; } = new();
+        public ObservableCollection<Datum> Animes { get; } = new();
         public ObservableCollection<string> Genres { get; } = new();
         public ObservableCollection<string> Types { get; } = new();
-        public ObservableCollection<Anime> SearchSuggestions { get; } = new();
+        public ObservableCollection<Datum> SearchSuggestions { get; } = new();
 
-        private List<Anime> _allAnimes = new();
+        private List<Datum> _allAnimes = new();
 
         public HomeController(IJikanService jikanService, MainController mainController, UserDataService userDataService)
         {
@@ -34,7 +34,23 @@ namespace AnimeDiscover.Services
         {
             try
             {
-                var animes = await _jikanService.GetCurrentSeasonAsync();
+                var animes = await _jikanService.SearchAnimeByCriteriaAsync(new AnimeApiCriteria
+                {
+                    status = "airing",
+                    order_by = "score",
+                    sort = "desc",
+                    limit = 24
+                });
+
+                if (animes == null || animes.Count == 0)
+                {
+                    animes = await _jikanService.SearchAnimeByCriteriaAsync(new AnimeApiCriteria
+                    {
+                        order_by = "popularity",
+                        sort = "desc",
+                        limit = 24
+                    });
+                }
                 
                 if (animes != null && animes.Count > 0)
                 {
@@ -59,6 +75,19 @@ namespace AnimeDiscover.Services
             }
         }
 
+        public async Task SearchAndApplyAsync(string query, string selectedGenre, string selectedType)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                ApplyFilters(selectedGenre, selectedType);
+                return;
+            }
+
+            var results = await _jikanService.SearchAnimeAsync(query);
+            _allAnimes = results ?? new List<Datum>();
+            ApplyFilters(selectedGenre, selectedType);
+        }
+
         public async Task SearchAsync(string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -75,7 +104,7 @@ namespace AnimeDiscover.Services
             }
         }
 
-        public void SelectAnime(Anime anime)
+        public void SelectAnime(Datum anime)
         {
             _mainController.ShowAnimeDetails(anime);
         }
@@ -151,14 +180,14 @@ namespace AnimeDiscover.Services
             Types.Add("Tous les types");
         }
 
-        private void ApplyUserData(Anime anime)
+        private void ApplyUserData(Datum anime)
         {
             var userData = _userDataService.GetUserData(anime.Id);
             anime.IsWatched = userData.IsWatched;
             anime.UserScore = userData.UserScore;
         }
 
-        private List<Anime> GenerateSampleAnimes()
+        private List<Datum> GenerateSampleAnimes()
         {
             var sampleGenres = new[] { "Action", "Aventure", "Comédie", "Drame", "Fantasy", "Romance" };
             var sampleTypes = new[] { "TV", "Movie", "OVA" };
@@ -166,11 +195,11 @@ namespace AnimeDiscover.Services
                                 "One Piece", "Bleach", "My Hero Academia", "Steins Gate", "Neon Genesis Evangelion",
                                 "Fullmetal Alchemist", "Cowboy Bebop", "Samurai Champloo", "Code Geass", "Assassination Classroom" };
 
-            var animes = new List<Anime>();
+            var animes = new List<Datum>();
             for (int i = 0; i < 12; i++)
             {
                 var randomGenres = sampleGenres.OrderBy(x => _random.Next()).Take(_random.Next(1, 4)).ToList();
-                animes.Add(new Anime
+                animes.Add(new Datum
                 {
                     Id = i + 1000,
                     Title = titles[_random.Next(titles.Length)],

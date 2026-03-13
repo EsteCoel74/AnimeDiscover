@@ -38,11 +38,17 @@ namespace AnimeDiscover.Services
             NavigateAction?.Invoke(listPage);
         }
 
-        public void ShowAnimeDetails(Anime anime)
+        public void ShowAnimeDetails(Datum anime)
         {
             AnimeController.SetCurrentAnime(anime);
             var detailPage = new AnimePage { DataContext = AnimeController };
             NavigateAction?.Invoke(detailPage);
+        }
+
+        public void ShowAiConversation()
+        {
+            var aiConversationPage = new AiConversationPage(this, _jikanService);
+            NavigateAction?.Invoke(aiConversationPage);
         }
     }
 }

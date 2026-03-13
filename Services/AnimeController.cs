@@ -7,7 +7,7 @@ namespace AnimeDiscover.Services
         private readonly UserDataService _userDataService;
         private readonly MainController _mainController;
 
-        public Anime CurrentAnime { get; set; }
+        public Datum CurrentAnime { get; set; }
 
         public AnimeController(UserDataService userDataService, MainController mainController)
         {
@@ -15,7 +15,7 @@ namespace AnimeDiscover.Services
             _mainController = mainController;
         }
 
-        public void SetCurrentAnime(Anime anime)
+        public void SetCurrentAnime(Datum anime)
         {
             CurrentAnime = anime;
         }

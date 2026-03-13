@@ -216,10 +216,19 @@
                 </StackPanel>
             
                 <!--Trailer Section (if available)-->
-                <StackPanel x:Name="TrailerSection" Margin="0,0,0,20">
+                <StackPanel x:Name="TrailerSection" Margin="0,0,0,20" Visibility="Collapsed">
                     <TextBlock Text="Bande Annonce" FontSize="14" FontWeight="Bold" 
                                Foreground="#333333" Margin="0,0,0,8"/>
-                    <WebBrowser x:Name="TrailerBrowser" Height="300"/>
+                    <Button x:Name="OpenTrailerButton"
+                            Content="▶ Ouvrir la bande annonce"
+                            Width="220"
+                            Padding="10,8"
+                            Background="#E53935"
+                            Foreground="White"
+                            BorderBrush="#C62828"
+                            BorderThickness="1"
+                            Cursor="Hand"
+                            Click="OpenTrailerButton_Click"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

@@ -6,8 +6,9 @@ namespace AnimeDiscover.Services
 {
     public interface IJikanService
     {
-        Task<List<Anime>> GetCurrentSeasonAsync();
-        Task<List<Anime>> SearchAnimeAsync(string query);
-        Task<Anime> GetAnimeByIdAsync(int id);
+        Task<List<Datum>> GetCurrentSeasonAsync();
+        Task<List<Datum>> SearchAnimeAsync(string query);
+        Task<List<Datum>> SearchAnimeByCriteriaAsync(AnimeApiCriteria criteria);
+        Task<Datum> GetAnimeByIdAsync(int id);
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -15,52 +16,103 @@ namespace AnimeDiscover.Services
         public JikanService()
         {
             _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("AnimeDiscover/1.0");
         }
 
-        public async Task<List<Anime>> GetCurrentSeasonAsync()
+        public async Task<List<Datum>> SearchAnimeByCriteriaAsync(AnimeApiCriteria criteria)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{BaseUrl}/seasons/now?sfw");
+                criteria ??= new AnimeApiCriteria();
+
+                var queryParts = new List<string>
+                {
+                    "sfw=true",
+                    $"limit={Math.Clamp(criteria.limit <= 0 ? 8 : criteria.limit, 1, 25)}"
+                };
+
+                if (!string.IsNullOrWhiteSpace(criteria.q))
+                    queryParts.Add($"q={Uri.EscapeDataString(criteria.q)}");
+                if (!string.IsNullOrWhiteSpace(criteria.type))
+                    queryParts.Add($"type={Uri.EscapeDataString(criteria.type)}");
+                if (!string.IsNullOrWhiteSpace(criteria.status))
+                    queryParts.Add($"status={Uri.EscapeDataString(criteria.status)}");
+                if (!string.IsNullOrWhiteSpace(criteria.rating))
+                    queryParts.Add($"rating={Uri.EscapeDataString(criteria.rating)}");
+                if (!string.IsNullOrWhiteSpace(criteria.order_by))
+                    queryParts.Add($"order_by={Uri.EscapeDataString(criteria.order_by)}");
+                if (!string.IsNullOrWhiteSpace(criteria.sort))
+                    queryParts.Add($"sort={Uri.EscapeDataString(criteria.sort)}");
+                if (criteria.min_score.HasValue)
+                    queryParts.Add($"min_score={criteria.min_score.Value.ToString(CultureInfo.InvariantCulture)}");
+                if (!string.IsNullOrWhiteSpace(criteria.start_date))
+                    queryParts.Add($"start_date={Uri.EscapeDataString(criteria.start_date)}");
+                if (!string.IsNullOrWhiteSpace(criteria.end_date))
+                    queryParts.Add($"end_date={Uri.EscapeDataString(criteria.end_date)}");
+                if (criteria.genre_ids != null && criteria.genre_ids.Count > 0)
+                    queryParts.Add($"genres={string.Join(",", criteria.genre_ids)}");
+
+                var url = $"{BaseUrl}/anime?{string.Join("&", queryParts)}";
+
+                var response = await _httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var root = JsonSerializer.Deserialize<AnimeDataResponse>(json, GetJsonOptions());
+                var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
 
-                return MapToAnimeList(root?.data ?? new());
+                return root?.data ?? new List<Datum>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erreur recherche par critères API: {ex.Message}");
+                return new List<Datum>();
+            }
+        }
+
+        public async Task<List<Datum>> GetCurrentSeasonAsync()
+        {
+            try
+            {
+                var response = await GetAsyncWithRetry($"{BaseUrl}/seasons/now?sfw");
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
+
+                return root?.data ?? new List<Datum>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Erreur lors du chargement de la saison: {ex.Message}");
-                return new List<Anime>();
+                return new List<Datum>();
             }
         }
 
-        public async Task<List<Anime>> SearchAnimeAsync(string query)
+        public async Task<List<Datum>> SearchAnimeAsync(string query)
         {
             try
             {
                 var encodedQuery = Uri.EscapeDataString(query);
-                var response = await _httpClient.GetAsync($"{BaseUrl}/anime?q={encodedQuery}&limit=5&sfw");
+                var response = await GetAsyncWithRetry($"{BaseUrl}/anime?q={encodedQuery}&limit=8&sfw");
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var root = JsonSerializer.Deserialize<AnimeDataResponse>(json, GetJsonOptions());
+                var root = JsonSerializer.Deserialize<Root>(json, GetJsonOptions());
 
-                return MapToAnimeList(root?.data ?? new());
+                return root?.data ?? new List<Datum>();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Erreur lors de la recherche: {ex.Message}");
-                return new List<Anime>();
+                return new List<Datum>();
             }
         }
 
-        public async Task<Anime> GetAnimeByIdAsync(int id)
+        public async Task<Datum> GetAnimeByIdAsync(int id)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{BaseUrl}/anime/{id}");
+                var response = await GetAsyncWithRetry($"{BaseUrl}/anime/{id}");
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -68,7 +120,7 @@ namespace AnimeDiscover.Services
                 var dataElement = doc.RootElement.GetProperty("data");
                 var datum = JsonSerializer.Deserialize<Datum>(dataElement.GetRawText(), GetJsonOptions());
 
-                return datum != null ? MapToAnime(datum) : null;
+                return datum;
             }
             catch (Exception ex)
             {
@@ -77,94 +129,16 @@ namespace AnimeDiscover.Services
             }
         }
 
-        private List<Anime> MapToAnimeList(List<Datum> data)
+        private async Task<HttpResponseMessage> GetAsyncWithRetry(string url)
         {
-            var result = new List<Anime>();
-            foreach (var datum in data)
+            var response = await _httpClient.GetAsync(url);
+            if ((int)response.StatusCode == 429)
             {
-                result.Add(MapToAnime(datum));
-            }
-            return result;
-        }
-
-        private Anime MapToAnime(Datum datum)
-        {
-            var genres = new List<string>();
-            if (datum.genres != null)
-            {
-                foreach (var genre in datum.genres)
-                {
-                    genres.Add(genre.name);
-                }
+                await Task.Delay(1200);
+                response = await _httpClient.GetAsync(url);
             }
 
-            var themes = new List<string>();
-            if (datum.themes != null)
-            {
-                foreach (var theme in datum.themes)
-                {
-                    themes.Add(theme.name);
-                }
-            }
-
-            var studios = new List<string>();
-            if (datum.studios != null)
-            {
-                foreach (var studio in datum.studios)
-                {
-                    studios.Add(studio.name);
-                }
-            }
-
-            var producers = new List<string>();
-            if (datum.producers != null)
-            {
-                foreach (var producer in datum.producers)
-                {
-                    producers.Add(producer.name);
-                }
-            }
-
-            var licensors = new List<string>();
-            if (datum.licensors != null)
-            {
-                foreach (var licensor in datum.licensors)
-                {
-                    licensors.Add(licensor.name);
-                }
-            }
-
-            var broadcastString = datum.broadcast?.@string ?? "";
-
-            return new Anime
-            {
-                Id = datum.mal_id,
-                Title = datum.title ?? datum.title_english ?? "Sans titre",
-                ImageUrl = datum.images?.jpg?.large_image_url ?? datum.images?.jpg?.image_url,
-                Synopsis = datum.synopsis ?? "Aucun synopsis disponible",
-                Background = datum.background ?? "",
-                Type = datum.type ?? "Inconnu",
-                Genres = genres,
-                Themes = themes,
-                Studios = studios,
-                Producers = producers,
-                Licensors = licensors,
-                TrailerUrl = datum.trailer?.embed_url,
-                Year = datum.year,
-                Score = datum.score,
-                ScoredBy = datum.scored_by,
-                Episodes = datum.episodes ?? 0,
-                Status = datum.status ?? "Inconnu",
-                Season = datum.season ?? "",
-                Source = datum.source ?? "",
-                Duration = datum.duration ?? "",
-                Rating = datum.rating ?? "",
-                Rank = datum.rank,
-                Popularity = datum.popularity,
-                Members = datum.members,
-                Favorites = datum.favorites,
-                Broadcast = broadcastString
-            };
+            return response;
         }
 
         private JsonSerializerOptions GetJsonOptions()
@@ -172,6 +146,7 @@ namespace AnimeDiscover.Services
             return new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true,
                 WriteIndented = false
             };
         }

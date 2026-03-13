@@ -11,7 +11,7 @@ namespace AnimeDiscover.Services
         private readonly MainController _mainController;
         private readonly IJikanService _jikanService;
 
-        public ObservableCollection<Anime> UserAnimes { get; } = new();
+        public ObservableCollection<Datum> UserAnimes { get; } = new();
 
         public AnimeListController(UserDataService userDataService, MainController mainController, IJikanService jikanService)
         {
@@ -38,14 +38,14 @@ namespace AnimeDiscover.Services
             }
         }
 
-        public void UpdateAnimeData(Anime anime, bool isWatched, int? userScore)
+        public void UpdateAnimeData(Datum anime, bool isWatched, int? userScore)
         {
             _userDataService.SaveUserData(anime.Id, isWatched, userScore);
             anime.IsWatched = isWatched;
             anime.UserScore = userScore;
         }
 
-        public void SelectAnime(Anime anime)
+        public void SelectAnime(Datum anime)
         {
             _mainController.ShowAnimeDetails(anime);
         }
