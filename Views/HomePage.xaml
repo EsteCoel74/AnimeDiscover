@@ -6,7 +6,13 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="900">
-    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#140E3D" Offset="0.0"/>
+                <GradientStop Color="#8378C7" Offset="1.0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -14,7 +20,7 @@
 
         <!--Title Section-->
         <TextBlock Grid.Row="0" Text="🎌 Animes de la Saison" FontSize="24" FontWeight="Bold" 
-                   Foreground="{DynamicResource TextPrimaryColor}" Margin="30,20,0,15"/>
+                    Foreground="White" Margin="30,20,0,15"/>
 
         <!--Anime Grid List-->
         <ScrollViewer Grid.Row="1">
@@ -29,8 +35,8 @@
                     <DataTemplate>
                         <!--Anime Card-->
                         <Border Width="200" Height="320" Margin="10" 
-                                Background="{DynamicResource SurfaceBrush}" CornerRadius="10" 
-                                BorderBrush="{DynamicResource BorderBrushSoft}" BorderThickness="1"
+                                Background="White" CornerRadius="8" 
+                                BorderBrush="#E0E0E0" BorderThickness="1"
                                 Cursor="Hand" MouseLeftButtonDown="AnimeCard_MouseLeftButtonDown"
                                 Tag="{Binding}">
                             <Border.Effect>
@@ -44,37 +50,37 @@
                                 </Grid.RowDefinitions>
 
                                 <!--Anime Cover Image-->
-                                <Border Grid.Row="0" Background="{DynamicResource SurfaceAltBrush}" CornerRadius="8,8,0,0" ClipToBounds="True">
+                                <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8,8,0,0" ClipToBounds="True">
                                     <Image Source="{Binding ImageUrl}" 
-                                           Stretch="UniformToFill" 
-                                           VerticalAlignment="Center"
-                                           HorizontalAlignment="Center"/>
+                                            Stretch="UniformToFill" 
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"/>
                                 </Border>
 
                                 <!--Anime Info Section-->
                                 <StackPanel Grid.Row="1" Margin="12" VerticalAlignment="Top">
                                     <!--Title-->
                                     <TextBlock Text="{Binding Title}" 
-                                               FontSize="13" FontWeight="Bold" 
-                                               Foreground="{DynamicResource TextPrimaryColor}" 
-                                               TextWrapping="Wrap"
-                                               MaxHeight="50"
-                                               LineHeight="16"/>
+                                                FontSize="13" FontWeight="Bold" 
+                                                Foreground="#333333" 
+                                                TextWrapping="Wrap"
+                                                MaxHeight="50"
+                                                LineHeight="16"/>
 
                                     <!--Type and Year-->
                                     <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
                                         <TextBlock Text="{Binding Type}" 
-                                                   FontSize="11" Foreground="{DynamicResource TextSecondaryColor}" FontWeight="SemiBold"/>
-                                        <TextBlock Text=" • " FontSize="11" Foreground="{DynamicResource TextSecondaryColor}" Margin="4,0"/>
+                                                    FontSize="11" Foreground="#666666" FontWeight="SemiBold"/>
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#999999" Margin="4,0"/>
                                         <TextBlock Text="{Binding Year}" 
-                                                   FontSize="11" Foreground="{DynamicResource TextSecondaryColor}"/>
+                                                    FontSize="11" Foreground="#666666"/>
                                     </StackPanel>
 
                                     <!--Score-->
                                     <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                                         <TextBlock Text="⭐" FontSize="12" Margin="0,0,4,0"/>
                                         <TextBlock Text="{Binding Score, StringFormat='0.0'}" 
-                                                   FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
+                                                    FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
                                     </StackPanel>
 
                                     <!--Genres-->
@@ -88,7 +94,7 @@
                                             <DataTemplate>
                                                 <Border Background="#E3F2FD" CornerRadius="4" Padding="5,2" Margin="0,2,4,2">
                                                     <TextBlock Text="{Binding}" 
-                                                               FontSize="10" Foreground="#1976D2" FontWeight="SemiBold"/>
+                                                                FontSize="10" Foreground="#1976D2" FontWeight="SemiBold"/>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
