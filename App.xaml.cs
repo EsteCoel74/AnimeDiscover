@@ -2,6 +2,7 @@
 using System.Data;
 using System.Windows;
 
+// Point d'entrée WPF de l'application.
 namespace AnimeDiscover
 {
     /// <summary>

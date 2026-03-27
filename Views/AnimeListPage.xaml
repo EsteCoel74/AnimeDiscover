@@ -6,58 +6,125 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+    <!-- Page ma liste : animes suivis par l'utilisateur -->
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#140E3D" Offset="0.0"/>
+                <GradientStop Color="#8378C7" Offset="1.0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid.Resources>
+            <Style x:Key="GlassCard" TargetType="Border">
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="BorderBrush" Value="#55FFFFFF"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="#22FFFFFF"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
+
+            <Style x:Key="StarButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="#FFC107"/>
+                <Setter Property="FontSize" Value="22"/>
+                <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+                <Setter Property="Padding" Value="2,0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <!--Header with Back Button-->
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,20,0,10">
-            <Button Content="← Retour" x:Name="BackButton" Click="BackButton_Click" Style="{StaticResource InfoButtonStyle}"/>
-            <TextBlock Text="Ma Liste d'Animes" FontSize="20" FontWeight="Bold" 
-                       Foreground="{DynamicResource TextPrimaryColor}" VerticalAlignment="Center" Margin="20,0,0,0"/>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,20,20,10">
+            <Button Content="{DynamicResource AnimeList.Back}"
+                    x:Name="BackButton"
+                    Click="BackButton_Click"
+                    Background="#2196F3"
+                    Foreground="White"
+                    Padding="10,8"
+                    Width="100"
+                    Cursor="Hand"/>
+            <TextBlock Text="{DynamicResource AnimeList.Title}" FontSize="20" FontWeight="Bold" 
+                       Foreground="White" VerticalAlignment="Center" Margin="20,0,0,0"/>
         </StackPanel>
 
-        <!--Anime List Grid-->
-        <DataGrid Grid.Row="1" x:Name="AnimeListGrid"
-                  ItemsSource="{Binding UserAnimes}"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  Margin="20">
+        <Border Grid.Row="1" Style="{StaticResource GlassCard}" Margin="20,0,20,20">
+            <ListView x:Name="AnimeListView" ItemsSource="{Binding UserAnimes}" BorderThickness="0" Background="Transparent">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,6"
+                                Padding="10"
+                                CornerRadius="10"
+                                Background="#2E2A56"
+                                BorderBrush="#55FFFFFF"
+                                BorderThickness="1">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Image" Width="80">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Source="{Binding ImageUrl}" Stretch="UniformToFill" Height="100"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
+                                <Border Grid.Column="0" CornerRadius="6" ClipToBounds="True" Background="#1A1740" Width="90" MinWidth="70" MaxWidth="110">
+                                    <Image Source="{Binding ImageUrl}" Height="110" Stretch="UniformToFill"/>
+                                </Border>
 
-                <DataGridTextColumn Header="Titre" Binding="{Binding Title}" Width="200"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding Type}" Width="80"/>
+                                <StackPanel Grid.Column="1" Margin="12,0,12,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Title}" Foreground="White" FontWeight="Bold" TextWrapping="Wrap"/>
+                                    <TextBlock Margin="0,4,0,0" Foreground="#D6D0FF">
+                                        <Run Text="{DynamicResource AnimeList.Type}"/><Run Text="{Binding Type}"/>
+                                        <Run Text="{DynamicResource AnimeList.MalScore}"/><Run Text="{Binding Score, StringFormat={}{0:0.0}}"/>
+                                    </TextBlock>
+                                </StackPanel>
 
-                <DataGridTemplateColumn Header="Vu" Width="60">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsWatched, UpdateSourceTrigger=PropertyChanged}" 
-                                      VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTemplateColumn Header="Note (0-10)" Width="100">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Slider Minimum="0" Maximum="10" Value="{Binding UserScore, UpdateSourceTrigger=PropertyChanged}" 
-                                    VerticalAlignment="Center"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <DataGridTextColumn Header="Score MAL" Binding="{Binding Score, StringFormat='0.0'}" Width="80"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" MinWidth="200">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <CheckBox IsChecked="{Binding IsWatched, UpdateSourceTrigger=PropertyChanged}"
+                                                  Checked="CheckBox_WatchedChanged"
+                                                  Unchecked="CheckBox_WatchedChanged"
+                                                  VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource AnimeList.Watched}" Foreground="White" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{DynamicResource AnimeList.EpisodesWatched}" Foreground="#E6E6E6" VerticalAlignment="Center"/>
+                                        <TextBox Width="46"
+                                                 Text="{Binding EpisodesWatched, UpdateSourceTrigger=PropertyChanged}"
+                                                 HorizontalContentAlignment="Center"
+                                                 VerticalContentAlignment="Center"
+                                                 LostFocus="EpisodesWatchedTextBox_LostFocus"
+                                                 KeyDown="EpisodesWatchedTextBox_KeyDown"/>
+                                        <TextBlock Text=" / " Foreground="#E6E6E6" VerticalAlignment="Center" Margin="4,0,2,0"/>
+                                        <TextBlock Text="{Binding Episodes}" Foreground="#E6E6E6" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{DynamicResource AnimeList.MyScore}" Foreground="#E6E6E6" Margin="0,8,0,2"/>
+                                    <StackPanel Orientation="Horizontal" Loaded="StarRatingPanel_Loaded" MouseLeave="StarRatingPanel_MouseLeave">
+                                        <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="1" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                        <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="2" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                        <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="3" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                        <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="4" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                        <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="5" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
     </Grid>
 </UserControl>

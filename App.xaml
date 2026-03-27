@@ -3,10 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AnimeDiscover"
              StartupUri="MainWindow.xaml">
+    <!-- Ressources globales de style partagées dans toute l'application -->
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Themes/AppTheme.xaml"/>
+                <ResourceDictionary Source="Themes/Strings.fr-FR.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="DangerBrush" Color="#DC2626"/>

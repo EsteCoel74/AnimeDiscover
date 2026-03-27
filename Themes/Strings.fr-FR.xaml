@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <sys:String x:Key="MainWindow.HomeButtonText" xmlns:sys="clr-namespace:System;assembly=mscorlib">🎌 Anime de la saison</sys:String>
+    <sys:String x:Key="MainWindow.MyListButtonText" xmlns:sys="clr-namespace:System;assembly=mscorlib">📋 Ma Liste</sys:String>
+    <sys:String x:Key="MainWindow.AiButtonText" xmlns:sys="clr-namespace:System;assembly=mscorlib">🤖 IA Anime</sys:String>
+    <sys:String x:Key="MainWindow.SettingsButtonText" xmlns:sys="clr-namespace:System;assembly=mscorlib">⚙️ Paramètres</sys:String>
+    <sys:String x:Key="MainWindow.SearchToolTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Saisis un titre, un genre ou un critère puis appuie sur Entrée</sys:String>
+    <sys:String x:Key="MainWindow.FooterText" xmlns:sys="clr-namespace:System;assembly=mscorlib">© 2024 AnimeDiscover - Powered by Jikan API</sys:String>
+
+    <sys:String x:Key="Genre.All" xmlns:sys="clr-namespace:System;assembly=mscorlib">Tous les genres</sys:String>
+    <sys:String x:Key="Genre.Action" xmlns:sys="clr-namespace:System;assembly=mscorlib">Action</sys:String>
+    <sys:String x:Key="Genre.Adventure" xmlns:sys="clr-namespace:System;assembly=mscorlib">Aventure</sys:String>
+    <sys:String x:Key="Genre.Comedy" xmlns:sys="clr-namespace:System;assembly=mscorlib">Comédie</sys:String>
+    <sys:String x:Key="Genre.Drama" xmlns:sys="clr-namespace:System;assembly=mscorlib">Drame</sys:String>
+    <sys:String x:Key="Genre.Fantasy" xmlns:sys="clr-namespace:System;assembly=mscorlib">Fantasy</sys:String>
+    <sys:String x:Key="Genre.Horror" xmlns:sys="clr-namespace:System;assembly=mscorlib">Horror</sys:String>
+    <sys:String x:Key="Genre.Romance" xmlns:sys="clr-namespace:System;assembly=mscorlib">Romance</sys:String>
+    <sys:String x:Key="Genre.SciFi" xmlns:sys="clr-namespace:System;assembly=mscorlib">Sci-Fi</sys:String>
+    <sys:String x:Key="Genre.SliceOfLife" xmlns:sys="clr-namespace:System;assembly=mscorlib">Slice of Life</sys:String>
+    <sys:String x:Key="Genre.Sports" xmlns:sys="clr-namespace:System;assembly=mscorlib">Sports</sys:String>
+    <sys:String x:Key="Genre.Supernatural" xmlns:sys="clr-namespace:System;assembly=mscorlib">Surnaturel</sys:String>
+
+    <sys:String x:Key="Type.All" xmlns:sys="clr-namespace:System;assembly=mscorlib">Tous les types</sys:String>
+    <sys:String x:Key="Type.TV" xmlns:sys="clr-namespace:System;assembly=mscorlib">TV</sys:String>
+    <sys:String x:Key="Type.Movie" xmlns:sys="clr-namespace:System;assembly=mscorlib">Movie</sys:String>
+    <sys:String x:Key="Type.OVA" xmlns:sys="clr-namespace:System;assembly=mscorlib">OVA</sys:String>
+    <sys:String x:Key="Type.ONA" xmlns:sys="clr-namespace:System;assembly=mscorlib">ONA</sys:String>
+    <sys:String x:Key="Type.Special" xmlns:sys="clr-namespace:System;assembly=mscorlib">Special</sys:String>
+
+    <sys:String x:Key="HomePage.Title" xmlns:sys="clr-namespace:System;assembly=mscorlib">🎌 Animes de la Saison</sys:String>
+    <sys:String x:Key="HomePage.AddToList" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ajouter à ma liste</sys:String>
+
+    <sys:String x:Key="AnimeList.Back" xmlns:sys="clr-namespace:System;assembly=mscorlib">← Retour</sys:String>
+    <sys:String x:Key="AnimeList.Title" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ma Liste d'Animes</sys:String>
+    <sys:String x:Key="AnimeList.Type" xmlns:sys="clr-namespace:System;assembly=mscorlib">Type: </sys:String>
+    <sys:String x:Key="AnimeList.MalScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">  •  Score MAL: </sys:String>
+    <sys:String x:Key="AnimeList.Watched" xmlns:sys="clr-namespace:System;assembly=mscorlib"> Déjà vu</sys:String>
+    <sys:String x:Key="AnimeList.EpisodesWatched" xmlns:sys="clr-namespace:System;assembly=mscorlib">Épisodes vus: </sys:String>
+    <sys:String x:Key="AnimeList.MyScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ma note</sys:String>
+
+    <sys:String x:Key="AiPage.Title" xmlns:sys="clr-namespace:System;assembly=mscorlib">🤖 Assistant IA Anime</sys:String>
+    <sys:String x:Key="AiPage.Subtitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Décris tes critères (genre, ambiance, durée, époque, etc.) pour recevoir des recommandations.</sys:String>
+    <sys:String x:Key="AiPage.AuthorAssistant" xmlns:sys="clr-namespace:System;assembly=mscorlib">Assistant IA</sys:String>
+    <sys:String x:Key="AiPage.AuthorUser" xmlns:sys="clr-namespace:System;assembly=mscorlib">Toi</sys:String>
+    <sys:String x:Key="AiPage.Welcome" xmlns:sys="clr-namespace:System;assembly=mscorlib">Décris précisément tes critères. Je filtre strictement les résultats trouvés dans l'API Jikan.</sys:String>
+    <sys:String x:Key="AiPage.Searching" xmlns:sys="clr-namespace:System;assembly=mscorlib">Recherche...</sys:String>
+    <sys:String x:Key="AiPage.Loading" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏳ Je recherche à travers le monde...</sys:String>
+    <sys:String x:Key="AiPage.NoMoreResults" xmlns:sys="clr-namespace:System;assembly=mscorlib">Je n'ai plus de nouveaux animes à proposer pour cette demande. Reformule ou ajoute un critère pour élargir.</sys:String>
+    <sys:String x:Key="AiPage.NoStrictResults" xmlns:sys="clr-namespace:System;assembly=mscorlib">Aucun anime ne correspond strictement à ton critère dans l'API.</sys:String>
+    <sys:String x:Key="AiPage.FoundResults" xmlns:sys="clr-namespace:System;assembly=mscorlib">J'ai trouvé {0} anime(s) strictement filtré(s) dans l'API.</sys:String>
+    <sys:String x:Key="AiPage.ApiUnavailable" xmlns:sys="clr-namespace:System;assembly=mscorlib">Impossible de contacter l'API pour le moment.</sys:String>
+    <sys:String x:Key="AiPage.TypeLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Type: </sys:String>
+    <sys:String x:Key="AiPage.ScoreLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">  •  Score: </sys:String>
+    <sys:String x:Key="AiPage.YearLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">  •  Année: </sys:String>
+    <sys:String x:Key="AiPage.Send" xmlns:sys="clr-namespace:System;assembly=mscorlib">Envoyer</sys:String>
+
+    <sys:String x:Key="Settings.Title" xmlns:sys="clr-namespace:System;assembly=mscorlib">Paramètres</sys:String>
+    <sys:String x:Key="Settings.Language" xmlns:sys="clr-namespace:System;assembly=mscorlib">Langue UI</sys:String>
+    <sys:String x:Key="Settings.LanguageToolTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Choisis la langue de l'interface</sys:String>
+    <sys:String x:Key="Settings.Theme" xmlns:sys="clr-namespace:System;assembly=mscorlib">Thème</sys:String>
+    <sys:String x:Key="Settings.ThemeLight" xmlns:sys="clr-namespace:System;assembly=mscorlib">☀ Clair</sys:String>
+    <sys:String x:Key="Settings.ThemeLightTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Activer le thème clair</sys:String>
+    <sys:String x:Key="Settings.ThemeDark" xmlns:sys="clr-namespace:System;assembly=mscorlib">🌙 Sombre</sys:String>
+    <sys:String x:Key="Settings.ThemeDarkTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Activer le thème sombre</sys:String>
+    <sys:String x:Key="Settings.Animations" xmlns:sys="clr-namespace:System;assembly=mscorlib">Animations UI</sys:String>
+    <sys:String x:Key="Settings.AnimationsOn" xmlns:sys="clr-namespace:System;assembly=mscorlib">✅ Activées</sys:String>
+    <sys:String x:Key="Settings.AnimationsOnTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Activer les animations de l'interface</sys:String>
+    <sys:String x:Key="Settings.AnimationsOff" xmlns:sys="clr-namespace:System;assembly=mscorlib">⏸ Désactivées</sys:String>
+    <sys:String x:Key="Settings.AnimationsOffTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Désactiver les animations de l'interface</sys:String>
+    <sys:String x:Key="Settings.Cancel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Annuler</sys:String>
+    <sys:String x:Key="Settings.Save" xmlns:sys="clr-namespace:System;assembly=mscorlib">Enregistrer</sys:String>
+
+    <sys:String x:Key="MessageBox.No" xmlns:sys="clr-namespace:System;assembly=mscorlib">Non</sys:String>
+    <sys:String x:Key="MessageBox.Yes" xmlns:sys="clr-namespace:System;assembly=mscorlib">Oui</sys:String>
+    <sys:String x:Key="MessageBox.Ok" xmlns:sys="clr-namespace:System;assembly=mscorlib">OK</sys:String>
+
+    <sys:String x:Key="AnimePage.Back" xmlns:sys="clr-namespace:System;assembly=mscorlib">← Retour</sys:String>
+    <sys:String x:Key="AnimePage.UserInfo" xmlns:sys="clr-namespace:System;assembly=mscorlib">Vos informations</sys:String>
+    <sys:String x:Key="AnimePage.Watched" xmlns:sys="clr-namespace:System;assembly=mscorlib">Anime vu</sys:String>
+    <sys:String x:Key="AnimePage.MyScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ma note</sys:String>
+    <sys:String x:Key="AnimePage.EpisodesWatched" xmlns:sys="clr-namespace:System;assembly=mscorlib">Épisodes vus</sys:String>
+    <sys:String x:Key="AnimePage.EpisodesWatchedTip" xmlns:sys="clr-namespace:System;assembly=mscorlib">Entrée: nombre d'épisodes vus</sys:String>
+    <sys:String x:Key="AnimePage.Status" xmlns:sys="clr-namespace:System;assembly=mscorlib">Statut</sys:String>
+    <sys:String x:Key="AnimePage.Season" xmlns:sys="clr-namespace:System;assembly=mscorlib">Saison</sys:String>
+    <sys:String x:Key="AnimePage.Source" xmlns:sys="clr-namespace:System;assembly=mscorlib">Source</sys:String>
+    <sys:String x:Key="AnimePage.RankPopularity" xmlns:sys="clr-namespace:System;assembly=mscorlib">Classement / Popularité</sys:String>
+    <sys:String x:Key="AnimePage.MalScore" xmlns:sys="clr-namespace:System;assembly=mscorlib">Score MAL</sys:String>
+    <sys:String x:Key="AnimePage.Genres" xmlns:sys="clr-namespace:System;assembly=mscorlib">Genres</sys:String>
+    <sys:String x:Key="AnimePage.Themes" xmlns:sys="clr-namespace:System;assembly=mscorlib">Thèmes</sys:String>
+    <sys:String x:Key="AnimePage.Studios" xmlns:sys="clr-namespace:System;assembly=mscorlib">Studios</sys:String>
+    <sys:String x:Key="AnimePage.Producers" xmlns:sys="clr-namespace:System;assembly=mscorlib">Producteurs</sys:String>
+    <sys:String x:Key="AnimePage.Synopsis" xmlns:sys="clr-namespace:System;assembly=mscorlib">Synopsis</sys:String>
+    <sys:String x:Key="AnimePage.Background" xmlns:sys="clr-namespace:System;assembly=mscorlib">Background: {0}</sys:String>
+    <sys:String x:Key="AnimePage.Trailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Bande Annonce</sys:String>
+    <sys:String x:Key="AnimePage.WatchTrailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Voir la bande annonce</sys:String>
+
+    <sys:String x:Key="Ui.LanguageSaved" xmlns:sys="clr-namespace:System;assembly=mscorlib">Paramètres UI enregistrés.</sys:String>
+    <sys:String x:Key="Ui.SettingsTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Paramètres</sys:String>
+    <sys:String x:Key="Ui.LoadError" xmlns:sys="clr-namespace:System;assembly=mscorlib">Erreur lors du chargement: {0}</sys:String>
+    <sys:String x:Key="Ui.ErrorTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Erreur</sys:String>
+</ResourceDictionary>

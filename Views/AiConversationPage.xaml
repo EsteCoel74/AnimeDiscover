@@ -6,7 +6,64 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="900">
-    <Grid Background="#FAFAFA" Margin="20">
+    <!-- Page de conversation avec l'assistant IA -->
+    <Grid Margin="20">
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#140E3D" Offset="0.0"/>
+                <GradientStop Color="#8378C7" Offset="1.0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid.Resources>
+            <Style x:Key="GlassCard" TargetType="Border">
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="BorderBrush" Value="#55FFFFFF"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="#22FFFFFF"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
+
+            <Style x:Key="RoundedButtonStyle" TargetType="Button">
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="10,6"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10"
+                                    TextElement.Foreground="White"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True"
+                                                  TextElement.Foreground="White"
+                                                  Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="RoundedPromptTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10"
+                                    SnapsToDevicePixels="True">
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -14,46 +71,48 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,15">
-            <TextBlock Text="🤖 Assistant IA Anime" FontSize="24" FontWeight="Bold" Foreground="#333333"/>
-            <TextBlock Text="Décris tes critères (genre, ambiance, durée, époque, etc.) pour recevoir des recommandations." 
-                       FontSize="12" Foreground="#666666" Margin="0,8,0,0" TextWrapping="Wrap"/>
+            <TextBlock Text="{DynamicResource AiPage.Title}" FontSize="24" FontWeight="Bold" Foreground="White"/>
+            <TextBlock Text="{DynamicResource AiPage.Subtitle}" 
+                       FontSize="12" Foreground="#E6E6E6" Margin="0,8,0,0" TextWrapping="Wrap"/>
         </StackPanel>
 
-        <Border Grid.Row="1" Background="White" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="10">
+        <Border Grid.Row="1" Style="{StaticResource GlassCard}">
             <ScrollViewer x:Name="ChatScrollViewer" VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Messages}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border x:Name="MessageBubble"
-                                    Background="#F5F5F5"
-                                    CornerRadius="8"
+                                    Background="#2E2A56"
+                                    BorderBrush="#55FFFFFF"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
                                     Padding="10"
                                     Margin="0,6"
                                     HorizontalAlignment="Left"
                                     MaxWidth="700">
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="#555555"/>
-                                    <TextBlock Text="{Binding Text}" Margin="0,4,0,0" TextWrapping="Wrap" Foreground="#222222"/>
+                                    <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="#D6D0FF"/>
+                                    <TextBlock Text="{Binding Text}" Margin="0,4,0,0" TextWrapping="Wrap" Foreground="White"/>
 
                                     <ItemsControl ItemsSource="{Binding Recommendations}" Margin="0,8,0,0">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate>
                                                 <Button Tag="{Binding}" Click="RecommendationButton_Click"
                                                         HorizontalContentAlignment="Left"
-                                                        Background="#FFFFFF"
-                                                        BorderBrush="#D0D7DE"
+                                                        Background="#191735"
+                                                        BorderBrush="#5D55A7"
                                                         BorderThickness="1"
                                                         Padding="8"
                                                         Margin="0,4,0,0"
                                                         Cursor="Hand">
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding title}" FontWeight="SemiBold" Foreground="#1F2328" TextWrapping="Wrap"/>
-                                                        <TextBlock Foreground="#57606A" FontSize="11" Margin="0,2,0,0">
-                                                            <Run Text="Type: "/>
+                                                        <TextBlock Text="{Binding title}" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap"/>
+                                                        <TextBlock Foreground="#C9C4F3" FontSize="11" Margin="0,2,0,0">
+                                                            <Run Text="{DynamicResource AiPage.TypeLabel}"/>
                                                             <Run Text="{Binding type}"/>
-                                                            <Run Text="  •  Score: "/>
+                                                            <Run Text="{DynamicResource AiPage.ScoreLabel}"/>
                                                             <Run Text="{Binding score, StringFormat={}{0:0.0}}"/>
-                                                            <Run Text="  •  Année: "/>
+                                                            <Run Text="{DynamicResource AiPage.YearLabel}"/>
                                                             <Run Text="{Binding year}"/>
                                                         </TextBlock>
                                                     </StackPanel>
@@ -65,7 +124,8 @@
                             </Border>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsUser}" Value="True">
-                                    <Setter TargetName="MessageBubble" Property="Background" Value="#E3F2FD"/>
+                                    <Setter TargetName="MessageBubble" Property="Background" Value="#3A2F7A"/>
+                                    <Setter TargetName="MessageBubble" Property="BorderBrush" Value="#8F84E0"/>
                                     <Setter TargetName="MessageBubble" Property="HorizontalAlignment" Value="Right"/>
                                 </DataTrigger>
                             </DataTemplate.Triggers>
@@ -76,32 +136,65 @@
         </Border>
 
         <Grid Grid.Row="2" Margin="0,15,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="10"/>
-                <ColumnDefinition Width="120"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-            <TextBox Grid.Column="0"
-                     x:Name="PromptTextBox"
-                     MinHeight="44"
-                     MaxHeight="120"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     VerticalScrollBarVisibility="Auto"
-                     Padding="10"
-                     BorderBrush="#CCCCCC"
-                     BorderThickness="1"
-                     PreviewKeyDown="PromptTextBox_PreviewKeyDown"/>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="2"
-                    x:Name="SendButton"
-                    Content="Envoyer"
-                    Background="#4CAF50"
-                    Foreground="White"
-                    FontWeight="Bold"
-                    Cursor="Hand"
-                    Click="SendButton_Click"/>
+                <TextBox Grid.Column="0"
+                         x:Name="PromptTextBox"
+                         Style="{StaticResource RoundedPromptTextBoxStyle}"
+                         MinHeight="44"
+                         MaxHeight="120"
+                         AcceptsReturn="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         Padding="10"
+                         Foreground="White"
+                         Background="#1E1B45"
+                         BorderBrush="#7B70C8"
+                         BorderThickness="1"
+                         PreviewKeyDown="PromptTextBox_PreviewKeyDown"/>
+            </Grid>
+
+            <WrapPanel Grid.Row="1" Margin="0,10,0,0" HorizontalAlignment="Left">
+                <Button x:Name="MoreResultsButton"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Margin="0,0,8,0"
+                        Background="#3F51B5"
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        Cursor="Hand"
+                        Click="MoreResultsButton_Click">
+                    <TextBlock Text="Plus de résultats" Foreground="White"/>
+                </Button>
+
+                <Button x:Name="LockFiltersButton"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Margin="0,0,8,0"
+                        Background="#607D8B"
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        Cursor="Hand"
+                        Click="LockFiltersButton_Click">
+                    <TextBlock Text="Verrouiller filtres" Foreground="White"/>
+                </Button>
+
+                <Button x:Name="ResetConversationButton"
+                        Style="{StaticResource RoundedButtonStyle}"
+                        Background="#795548"
+                        Foreground="White"
+                        BorderBrush="Transparent"
+                        Cursor="Hand"
+                        Click="ResetConversationButton_Click">
+                    <TextBlock Text="Réinitialiser conversation" Foreground="White"/>
+                </Button>
+            </WrapPanel>
         </Grid>
     </Grid>
 </UserControl>
