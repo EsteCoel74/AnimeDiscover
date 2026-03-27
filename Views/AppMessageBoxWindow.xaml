@@ -1,0 +1,68 @@
+<Window x:Class="AnimeDiscover.Views.AppMessageBoxWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="Transparent"
+        AllowsTransparency="True"
+        SizeToContent="WidthAndHeight">
+    <Border Background="{DynamicResource SurfaceBrush}"
+            BorderBrush="{DynamicResource BorderBrushSoft}"
+            BorderThickness="1"
+            CornerRadius="14"
+            Padding="18"
+            MinWidth="360"
+            MaxWidth="560">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" LastChildFill="True" Margin="0,0,0,10">
+                <TextBlock x:Name="IconTextBlock"
+                           FontSize="24"
+                           Margin="0,0,10,0"
+                           VerticalAlignment="Center"/>
+                <TextBlock x:Name="TitleTextBlock"
+                           FontSize="16"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"/>
+            </DockPanel>
+
+            <TextBlock Grid.Row="1"
+                       x:Name="MessageTextBlock"
+                       Foreground="{DynamicResource TextPrimaryColor}"
+                       TextWrapping="Wrap"
+                       Margin="0,0,0,16"/>
+
+            <StackPanel Grid.Row="2"
+                        Orientation="Horizontal"
+                        HorizontalAlignment="Right">
+                <Button x:Name="NoButton"
+                        Content="{DynamicResource MessageBox.No}"
+                        Width="90"
+                        Margin="0,0,8,0"
+                        Style="{StaticResource InfoButtonStyle}"
+                        Click="NoButton_Click"
+                        Visibility="Collapsed"/>
+                <Button x:Name="YesButton"
+                        Content="{DynamicResource MessageBox.Yes}"
+                        Width="90"
+                        Margin="0,0,8,0"
+                        Style="{StaticResource SuccessButtonStyle}"
+                        Click="YesButton_Click"
+                        Visibility="Collapsed"/>
+                <Button x:Name="OkButton"
+                        Content="{DynamicResource MessageBox.Ok}"
+                        Width="90"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="OkButton_Click"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

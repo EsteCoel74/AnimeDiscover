@@ -6,7 +6,29 @@
              xmlns:local="clr-namespace:AnimeDiscover.Views"
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="900">
+    <!-- Page de détail d'un anime -->
     <Grid>
+        <Grid.Resources>
+            <Style x:Key="StarButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Foreground" Value="#FFC107"/>
+                <Setter Property="FontSize" Value="24"/>
+                <Setter Property="FontFamily" Value="Segoe UI Symbol"/>
+                <Setter Property="Padding" Value="2,0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </Grid.Resources>
+
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                 <GradientStop Color="#140E3D" Offset="0.0"/>
@@ -19,7 +41,7 @@
         </Grid.RowDefinitions>
 
         <!--Back Button-->
-        <Button Grid.Row="0" Content="← Retour" Padding="10,8" Background="#2196F3" 
+        <Button Grid.Row="0" Content="{DynamicResource AnimePage.Back}" Padding="10,8" Background="#2196F3" 
                 Foreground="White" Cursor="Hand" Margin="20,10,0,10" Width="100" 
                 HorizontalAlignment="Left" Click="BackButton_Click"/>
 
@@ -56,49 +78,62 @@
 
                     <!--User Interactions and Info-->
                     <StackPanel Grid.Column="1" Margin="20,0,0,0">
-                        <TextBlock Text="Vos informations" FontSize="14" FontWeight="Bold" 
+                        <TextBlock Text="{DynamicResource AnimePage.UserInfo}" FontSize="14" FontWeight="Bold" 
                                    Foreground="White" Margin="0,0,0,10"/>
 
                         <!--Watched Checkbox-->
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                             <CheckBox x:Name="WatchedCheckBox" IsChecked="{Binding CurrentAnime.IsWatched}" 
                                       VerticalAlignment="Center" Width="20" Height="20" Checked="WatchedCheckBox_Checked" Unchecked="WatchedCheckBox_Checked"/>
-                            <TextBlock Text="Anime vu" FontSize="12" Foreground="White" 
+                            <TextBlock Text="{DynamicResource AnimePage.Watched}" FontSize="12" Foreground="White" 
                                        VerticalAlignment="Center" Margin="10,0,0,0"/>
                         </StackPanel>
 
                         <!--User Score Slider-->
                         <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Ma note" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
-                            <Slider x:Name="ScoreSlider" Minimum="0" Maximum="10" 
-                                    Value="{Binding CurrentAnime.UserScore, TargetNullValue=0}"
-                                    Width="200" HorizontalAlignment="Left" Margin="0,0,0,5" ValueChanged="ScoreSlider_ValueChanged"/>
-                            <TextBlock Text="{Binding CurrentAnime.UserScore, StringFormat='Note: {0}'}" 
-                                       FontSize="11" Foreground="#666666"/>
+                            <TextBlock Text="{DynamicResource AnimePage.MyScore}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <StackPanel x:Name="AnimePageStarsPanel" Orientation="Horizontal" Loaded="StarRatingPanel_Loaded" MouseLeave="StarRatingPanel_MouseLeave">
+                                <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="1" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter" />
+                                <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="2" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="3" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="4" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                                <Button Style="{StaticResource StarButtonStyle}" Content="☆" Tag="5" Click="StarButton_Click" MouseEnter="StarButton_MouseEnter"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="{DynamicResource AnimePage.EpisodesWatched}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBox Width="120"
+                                     HorizontalAlignment="Left"
+                                     Margin="0,2,0,0"
+                                     Text="{Binding CurrentAnime.EpisodesWatched, UpdateSourceTrigger=Explicit}"
+                                     ToolTip="{DynamicResource AnimePage.EpisodesWatchedTip}"
+                                     KeyDown="EpisodesWatchedTextBox_KeyDown"
+                                     LostFocus="EpisodesWatchedTextBox_LostFocus" TextChanged="TextBox_TextChanged"/>
                         </StackPanel>
 
                         <!--Statut-->
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="Statut" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBlock Text="{DynamicResource AnimePage.Status}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding CurrentAnime.Status}" FontSize="11" Foreground="White" FontWeight="SemiBold"/>
                         </StackPanel>
 
                         <!--Saison et Source-->
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="Saison" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBlock Text="{DynamicResource AnimePage.Season}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding CurrentAnime.Season}" FontSize="11" Foreground="White" FontWeight="SemiBold"/>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="Source" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBlock Text="{DynamicResource AnimePage.Source}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <TextBlock Text="{Binding CurrentAnime.Source}" FontSize="11" Foreground="White" FontWeight="SemiBold"/>
                         </StackPanel>
 
                         <!--Classement-->
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="Classement / Popularité" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBlock Text="{DynamicResource AnimePage.RankPopularity}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding CurrentAnime.Rank, StringFormat='Rank: #{0}'}" FontSize="11" Foreground="#666666"/>
+                                <TextBlock Text="{Binding CurrentAnime.Rank, StringFormat='Rank: #{0}'}" FontSize="11" Foreground="White"/>
                                 <TextBlock Text=" | " FontSize="11" Foreground="White" Margin="5,0"/>
                                 <TextBlock Text="{Binding CurrentAnime.Popularity, StringFormat='Pop: #{0}'}" FontSize="11" Foreground="White"/>
                             </StackPanel>
@@ -106,7 +141,7 @@
 
                         <!--Score MAL-->
                         <StackPanel Margin="0,0,0,10">
-                            <TextBlock Text="Score MAL" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
+                            <TextBlock Text="{DynamicResource AnimePage.MalScore}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding CurrentAnime.Score, StringFormat='⭐ {0:F1}'}" FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
                                 <TextBlock Text="{Binding CurrentAnime.ScoredBy, StringFormat=' ({0:N0} votes)'}" FontSize="11" Foreground="White" Margin="5,0,0,0"/>
@@ -123,7 +158,7 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                        <TextBlock Text="Genres" FontSize="14" FontWeight="Bold" 
+                        <TextBlock Text="{DynamicResource AnimePage.Genres}" FontSize="14" FontWeight="Bold" 
                                    Foreground="White" Margin="0,0,0,8"/>
                         <ItemsControl x:Name="GenresItemsControl">
                             <ItemsControl.ItemsPanel>
@@ -142,8 +177,8 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Thèmes" FontSize="14" FontWeight="Bold" 
-                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <TextBlock Text="{DynamicResource AnimePage.Themes}" FontSize="14" FontWeight="Bold" 
+                                   Foreground="White" Margin="0,0,0,8"/>
                         <ItemsControl ItemsSource="{Binding CurrentAnime.Themes}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -169,8 +204,8 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                        <TextBlock Text="Studios" FontSize="14" FontWeight="Bold" 
-                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <TextBlock Text="{DynamicResource AnimePage.Studios}" FontSize="14" FontWeight="Bold" 
+                                   Foreground="White" Margin="0,0,0,8"/>
                         <ItemsControl ItemsSource="{Binding CurrentAnime.Studios}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -188,8 +223,8 @@
                     </StackPanel>
 
                     <StackPanel Grid.Column="1">
-                        <TextBlock Text="Producteurs" FontSize="14" FontWeight="Bold" 
-                                   Foreground="#333333" Margin="0,0,0,8"/>
+                        <TextBlock Text="{DynamicResource AnimePage.Producers}" FontSize="14" FontWeight="Bold" 
+                                   Foreground="White" Margin="0,0,0,8"/>
                         <ItemsControl ItemsSource="{Binding CurrentAnime.Producers}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
@@ -209,23 +244,31 @@
 
                 <!--Synopsis-->
                 <StackPanel Margin="0,0,0,20">
-                    <TextBlock Text="Synopsis" FontSize="14" FontWeight="Bold" 
-                               Foreground="#333333" Margin="0,0,0,8"/>
-                    <TextBlock Text="{Binding CurrentAnime.Synopsis}" FontSize="12" 
-                               Foreground="#555555" TextWrapping="Wrap" LineHeight="18"/>
+                    <TextBlock Text="{DynamicResource AnimePage.Synopsis}" FontSize="14" FontWeight="Bold" 
+                               Foreground="White" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="SynopsisTextBlock" Text="{Binding CurrentAnime.Synopsis}" FontSize="12" 
+                               Foreground="White" TextWrapping="Wrap" LineHeight="18"/>
                 </StackPanel>
 
                 <!--Background (si disponible)-->
                 <StackPanel Margin="0,0,0,20">
                     <TextBlock Text="{Binding CurrentAnime.Background, StringFormat='Background: {0}'}" FontSize="12" 
-                               Foreground="#777777" TextWrapping="Wrap" LineHeight="16" Visibility="Visible"/>
+                               Foreground="White" TextWrapping="Wrap" LineHeight="16" Visibility="Visible"/>
                 </StackPanel>
 
                 <!--Trailer Section (if available)-->
                 <StackPanel x:Name="TrailerSection" Margin="0,0,0,20">
-                    <TextBlock Text="Bande Annonce" FontSize="14" FontWeight="Bold" 
+                    <TextBlock Text="{DynamicResource AnimePage.Trailer}" FontSize="14" FontWeight="Bold" 
                                Foreground="#333333" Margin="0,0,0,8"/>
-                    <WebBrowser x:Name="TrailerBrowser" Height="300"/>
+                    <Button Content="{DynamicResource AnimePage.WatchTrailer}"
+                            Width="220"
+                            Padding="10,8"
+                            Background="#FF9800"
+                            Foreground="White"
+                            BorderBrush="Transparent"
+                            Cursor="Hand"
+                            HorizontalAlignment="Left"
+                            Click="OpenTrailerButton_Click"/>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

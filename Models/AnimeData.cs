@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+// Modèles de données utilisés pour sérialiser les réponses de l'API Jikan.
 namespace AnimeDiscover.Models
 {
     public class Aired
@@ -45,10 +46,10 @@ namespace AnimeDiscover.Models
         public string rating { get; set; }
         public double? score { get; set; }
         public int? scored_by { get; set; }
-        public int rank { get; set; }
-        public int popularity { get; set; }
-        public int members { get; set; }
-        public int favorites { get; set; }
+        public int? rank { get; set; }
+        public int? popularity { get; set; }
+        public int? members { get; set; }
+        public int? favorites { get; set; }
         public string synopsis { get; set; }
         public string background { get; set; }
         public string season { get; set; }
@@ -165,13 +166,13 @@ namespace AnimeDiscover.Models
         [JsonIgnore]
         public string Rating { get => rating ?? string.Empty; set => rating = value; }
         [JsonIgnore]
-        public int Rank { get => rank; set => rank = value; }
+        public int Rank { get => rank ?? 0; set => rank = value; }
         [JsonIgnore]
-        public int Popularity { get => popularity; set => popularity = value; }
+        public int Popularity { get => popularity ?? 0; set => popularity = value; }
         [JsonIgnore]
-        public int Members { get => members; set => members = value; }
+        public int Members { get => members ?? 0; set => members = value; }
         [JsonIgnore]
-        public int Favorites { get => favorites; set => favorites = value; }
+        public int Favorites { get => favorites ?? 0; set => favorites = value; }
         [JsonIgnore]
         public string Broadcast
         {
@@ -187,6 +188,8 @@ namespace AnimeDiscover.Models
         public bool IsWatched { get; set; }
         [JsonIgnore]
         public int? UserScore { get; set; }
+        [JsonIgnore]
+        public int? EpisodesWatched { get; set; }
 
         private static string ExtractStringValue(object value)
         {
@@ -360,6 +363,7 @@ namespace AnimeDiscover.Models
         public int AnimeId { get; set; }
         public bool IsWatched { get; set; }
         public int? UserScore { get; set; }
+        public int? EpisodesWatched { get; set; }
     }
 
     public class AnimeApiCriteria
@@ -373,6 +377,7 @@ namespace AnimeDiscover.Models
         public double? min_score { get; set; }
         public string start_date { get; set; }
         public string end_date { get; set; }
+        public int? page { get; set; }
         public List<int> genre_ids { get; set; } = new();
         public int limit { get; set; } = 8;
     }

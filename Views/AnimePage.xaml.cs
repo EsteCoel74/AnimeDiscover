@@ -1,11 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 using AnimeDiscover.Services;
 
+// Gère la vue détaillée d'un anime et les interactions utilisateur associées.
 namespace AnimeDiscover.Views
 {
     /// <summary>
@@ -13,6 +20,10 @@ namespace AnimeDiscover.Views
     /// </summary>
     public partial class AnimePage : UserControl
     {
+        private static readonly Brush FilledStarBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F4B400"));
+        private static readonly Brush EmptyStarBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9AA0A6"));
+        private static readonly HttpClient TranslationHttpClient = new();
+        private static readonly ConcurrentDictionary<string, string> FrenchSynopsisCache = new();
         private string _trailerUrl;
 
         public AnimePage()
@@ -21,6 +32,7 @@ namespace AnimeDiscover.Views
             this.Loaded += AnimePage_Loaded;
         }
 
+        // Initialise les données de la page détail au chargement.
         private void AnimePage_Loaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is AnimeController controller && controller.CurrentAnime != null)
@@ -44,14 +56,96 @@ namespace AnimeDiscover.Views
                     _trailerUrl = null;
                     TrailerSection.Visibility = Visibility.Collapsed;
                 }
+
+                _ = ApplyLocalizedSynopsisAsync(controller);
             }
         }
 
+        // Traduit le synopsis en français quand la langue UI sélectionnée est le français.
+        private async Task ApplyLocalizedSynopsisAsync(AnimeController controller)
+        {
+            var synopsisTextBlock = FindName("SynopsisTextBlock") as TextBlock;
+            if (controller?.CurrentAnime == null || synopsisTextBlock == null)
+            {
+                return;
+            }
+
+            var originalSynopsis = controller.CurrentAnime.Synopsis;
+            synopsisTextBlock.Text = originalSynopsis;
+
+            var selectedLanguage = controller.GetUiLanguage();
+            var isFrench = string.Equals(selectedLanguage, "fr-FR", StringComparison.OrdinalIgnoreCase);
+            if (!isFrench || string.IsNullOrWhiteSpace(originalSynopsis))
+            {
+                return;
+            }
+
+            var cacheKey = $"{controller.CurrentAnime.Id}:fr";
+            if (FrenchSynopsisCache.TryGetValue(cacheKey, out var cachedSynopsis))
+            {
+                synopsisTextBlock.Text = cachedSynopsis;
+                return;
+            }
+
+            var translatedSynopsis = await TranslateSynopsisToFrenchAsync(originalSynopsis);
+            if (string.IsNullOrWhiteSpace(translatedSynopsis))
+            {
+                return;
+            }
+
+            FrenchSynopsisCache[cacheKey] = translatedSynopsis;
+            synopsisTextBlock.Text = translatedSynopsis;
+        }
+
+        // Traduit un synopsis anglais en français via le service texte externe.
+        private static async Task<string?> TranslateSynopsisToFrenchAsync(string synopsis)
+        {
+            try
+            {
+                var trimmed = synopsis.Trim();
+                if (trimmed.Length > 3000)
+                {
+                    trimmed = trimmed[..3000];
+                }
+
+                var prompt = "Traduis ce synopsis d'anime en français. "
+                           + "Réponds uniquement avec la traduction, sans commentaire:\n"
+                           + trimmed;
+
+                var url = $"https://text.pollinations.ai/{Uri.EscapeDataString(prompt)}";
+                var response = await TranslationHttpClient.GetStringAsync(url);
+                return NormalizeTranslatedText(response);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        // Nettoie la réponse de traduction brute pour l'affichage dans l'UI.
+        private static string NormalizeTranslatedText(string? rawText)
+        {
+            if (string.IsNullOrWhiteSpace(rawText))
+            {
+                return string.Empty;
+            }
+
+            var normalized = rawText.Trim();
+            if ((normalized.StartsWith('"') && normalized.EndsWith('"'))
+                || (normalized.StartsWith('\'') && normalized.EndsWith('\'')))
+            {
+                normalized = normalized[1..^1].Trim();
+            }
+
+            return normalized;
+        }
+
+        // Ouvre la bande-annonce dans le navigateur par défaut.
         private void OpenTrailerButton_Click(object sender, RoutedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(_trailerUrl))
             {
-                MessageBox.Show("Bande annonce indisponible pour cet anime.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppMessageBox.Show("Bande annonce indisponible pour cet anime.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -65,10 +159,11 @@ namespace AnimeDiscover.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Impossible d'ouvrir la bande annonce: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppMessageBox.Show($"Impossible d'ouvrir la bande annonce: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        // Retourne à la vue précédente.
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             if (DataContext is AnimeController controller)
@@ -77,6 +172,7 @@ namespace AnimeDiscover.Views
             }
         }
 
+        // Met à jour le statut "vu" de l'anime.
         private void WatchedCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             if (DataContext is AnimeController controller && sender is CheckBox checkBox)
@@ -85,12 +181,142 @@ namespace AnimeDiscover.Views
             }
         }
 
-        private void ScoreSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        // Initialise l'affichage des étoiles selon la note existante.
+        private void StarRatingPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            if (DataContext is AnimeController controller && sender is Slider slider)
+            if (sender is Panel panel && DataContext is AnimeController controller && controller.CurrentAnime != null)
             {
-                controller.UpdateUserScore((int)slider.Value);
+                UpdateStarButtons(panel, ConvertScoreToStars(controller.CurrentAnime.UserScore));
             }
+        }
+
+        // Enregistre la note utilisateur via les étoiles.
+        private void StarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is not Button button || button.Parent is not Panel panel)
+            {
+                return;
+            }
+
+            if (DataContext is not AnimeController controller || controller.CurrentAnime == null)
+            {
+                return;
+            }
+
+            if (!int.TryParse(button.Tag?.ToString(), out var stars))
+            {
+                return;
+            }
+
+            controller.UpdateUserScore(stars * 2);
+            UpdateStarButtons(panel, stars);
+        }
+
+        // Prévisualise les étoiles au survol de la souris.
+        private void StarButton_MouseEnter(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is not Button button || button.Parent is not Panel panel)
+            {
+                return;
+            }
+
+            if (!int.TryParse(button.Tag?.ToString(), out var stars))
+            {
+                return;
+            }
+
+            UpdateStarButtons(panel, stars);
+        }
+
+        // Restaure l'affichage des étoiles à la sortie de la zone.
+        private void StarRatingPanel_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (sender is not Panel panel)
+            {
+                return;
+            }
+
+            if (DataContext is not AnimeController controller || controller.CurrentAnime == null)
+            {
+                return;
+            }
+
+            UpdateStarButtons(panel, ConvertScoreToStars(controller.CurrentAnime.UserScore));
+        }
+
+        // Valide la saisie des épisodes vus quand Entrée est pressée.
+        private void EpisodesWatchedTextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter)
+            {
+                return;
+            }
+
+            SaveEpisodesWatchedFromInput(sender);
+            e.Handled = true;
+        }
+
+        // Valide la saisie des épisodes vus à la perte de focus.
+        private void EpisodesWatchedTextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            SaveEpisodesWatchedFromInput(sender);
+        }
+
+        // Parse, borne et enregistre le nombre d'épisodes vus.
+        private void SaveEpisodesWatchedFromInput(object sender)
+        {
+            if (sender is not TextBox textBox || DataContext is not AnimeController controller || controller.CurrentAnime == null)
+            {
+                return;
+            }
+
+            int? episodesWatched = null;
+            var text = textBox.Text?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(text))
+            {
+                if (!int.TryParse(text, out var parsedValue))
+                {
+                    textBox.Text = controller.CurrentAnime.EpisodesWatched?.ToString() ?? string.Empty;
+                    return;
+                }
+
+                var maxEpisodes = controller.CurrentAnime.Episodes > 0 ? controller.CurrentAnime.Episodes : int.MaxValue;
+                episodesWatched = Math.Clamp(parsedValue, 0, maxEpisodes);
+            }
+
+            controller.UpdateEpisodesWatched(episodesWatched);
+            textBox.Text = episodesWatched?.ToString() ?? string.Empty;
+        }
+
+        // Convertit une note sur 10 en nombre d'étoiles sur 5.
+        private static int ConvertScoreToStars(int? score)
+        {
+            var safeScore = Math.Clamp(score ?? 0, 0, 10);
+            return (int)Math.Round(safeScore / 2.0, MidpointRounding.AwayFromZero);
+        }
+
+        // Met à jour visuellement les boutons d'étoiles.
+        private static void UpdateStarButtons(Panel panel, int stars)
+        {
+            var safeStars = Math.Clamp(stars, 0, 5);
+
+            foreach (var starButton in panel.Children.OfType<Button>())
+            {
+                if (!int.TryParse(starButton.Tag?.ToString(), out var starIndex))
+                {
+                    continue;
+                }
+
+                starButton.Content = starIndex <= safeStars ? "★" : "☆";
+                starButton.Foreground = starIndex <= safeStars ? FilledStarBrush : EmptyStarBrush;
+            }
+        }
+
+        // Gère les changements de texte du champ épisodes (réservé pour évolution).
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }
