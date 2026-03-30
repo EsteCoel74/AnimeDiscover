@@ -3,7 +3,81 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AnimeDiscover"
              StartupUri="MainWindow.xaml">
+    <!-- Ressources globales de style partagées dans toute l'application -->
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/AppTheme.xaml"/>
+                <ResourceDictionary Source="Themes/Strings.fr-FR.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="DangerBrush" Color="#DC2626"/>
+            <SolidColorBrush x:Key="DangerHoverBrush" Color="#B91C1C"/>
+            <SolidColorBrush x:Key="ScrollbarThumbBrush" Color="#C1CADB"/>
+            <SolidColorBrush x:Key="ScrollbarThumbHoverBrush" Color="#AAB6CC"/>
+
+            <Style TargetType="ScrollViewer">
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+            </Style>
+
+            <Style TargetType="ScrollBar">
+                <Setter Property="Width" Value="10"/>
+                <Setter Property="Background" Value="Transparent"/>
+            </Style>
+
+            <Style TargetType="Thumb">
+                <Setter Property="Background" Value="{DynamicResource ScrollbarThumbBrush}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="5"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource ScrollbarThumbHoverBrush}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource DangerBrush}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource DangerHoverBrush}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <Style x:Key="CardContainerStyle" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="12"/>
+                <Setter Property="Padding" Value="12"/>
+            </Style>
+
+            <Style TargetType="DataGrid">
+                <Setter Property="Background" Value="{DynamicResource SurfaceBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+                <Setter Property="RowBackground" Value="{DynamicResource SurfaceBrush}"/>
+                <Setter Property="AlternatingRowBackground" Value="#F8FAFF"/>
+                <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                <Setter Property="HeadersVisibility" Value="Column"/>
+            </Style>
+
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="{DynamicResource SurfaceAltBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderBrushSoft}"/>
+                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                <Setter Property="Padding" Value="10,8"/>
+            </Style>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

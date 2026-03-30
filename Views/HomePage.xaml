@@ -1,0 +1,118 @@
+﻿<UserControl x:Class="AnimeDiscover.Views.HomePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:AnimeDiscover.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="500" d:DesignWidth="900">
+    <!-- Page d'accueil : listing des animes de saison -->
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#140E3D" Offset="0.0"/>
+                <GradientStop Color="#8378C7" Offset="1.0"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!--Title Section-->
+        <TextBlock Grid.Row="0" Text="{DynamicResource HomePage.Title}" FontSize="24" FontWeight="Bold" 
+                    Foreground="White" Margin="30,20,0,15"/>
+
+        <!--Anime Grid List-->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl x:Name="AnimeItemsControl" ItemsSource="{Binding Animes}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" Margin="20"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <!--Anime Card-->
+                        <Border MinWidth="180" MaxWidth="240" MinHeight="380" Margin="10" 
+                                Background="White" CornerRadius="8" 
+                                BorderBrush="#E0E0E0" BorderThickness="1"
+                                Cursor="Hand" MouseLeftButtonDown="AnimeCard_MouseLeftButtonDown"
+                                Tag="{Binding}">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="5" ShadowDepth="2" Opacity="0.2"/>
+                            </Border.Effect>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="200"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!--Anime Cover Image-->
+                                <Border Grid.Row="0" Background="#E0E0E0" CornerRadius="8,8,0,0" ClipToBounds="True">
+                                    <Image Source="{Binding ImageUrl}" 
+                                            Stretch="UniformToFill" 
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center"/>
+                                </Border>
+
+                                <!--Anime Info Section-->
+                                <StackPanel Grid.Row="1" Margin="12" VerticalAlignment="Top">
+                                    <!--Title-->
+                                    <TextBlock Text="{Binding Title}" 
+                                                FontSize="13" FontWeight="Bold" 
+                                                Foreground="#333333" 
+                                                TextWrapping="Wrap"
+                                                MaxHeight="50"
+                                                LineHeight="16"/>
+
+                                    <!--Type and Year-->
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <TextBlock Text="{Binding Type}" 
+                                                    FontSize="11" Foreground="#666666" FontWeight="SemiBold"/>
+                                        <TextBlock Text=" • " FontSize="11" Foreground="#999999" Margin="4,0"/>
+                                        <TextBlock Text="{Binding Year}" 
+                                                    FontSize="11" Foreground="#666666"/>
+                                    </StackPanel>
+
+                                    <!--Score-->
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <TextBlock Text="⭐" FontSize="12" Margin="0,0,4,0"/>
+                                        <TextBlock Text="{Binding Score, StringFormat='0.0'}" 
+                                                    FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
+                                    </StackPanel>
+
+                                    <!--Genres-->
+                                    <ItemsControl ItemsSource="{Binding Genres}" Margin="0,8,0,0">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel Orientation="Horizontal"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Background="#E3F2FD" CornerRadius="4" Padding="5,2" Margin="0,2,4,2">
+                                                    <TextBlock Text="{Binding}" 
+                                                                FontSize="10" Foreground="#1976D2" FontWeight="SemiBold"/>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                        <Button Content="{DynamicResource HomePage.AddToList}"
+                                                Tag="{Binding}"
+                                                Padding="8,4"
+                                                Click="AddToMyListButton_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

@@ -5,8 +5,188 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AnimeDiscover"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="AnimeDiscover"
+        MinHeight="700"
+        MinWidth="980"
+        Background="{DynamicResource WindowBackgroundBrush}">
+    <!-- Écran principal : en-tête, recherche, contenu dynamique et pied de page -->
     <Grid>
+        <Grid.Background>
+            <DynamicResource ResourceKey="MainGradientBrush"/>
+        </Grid.Background>
 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="110"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+
+        <!--========== Top Header Row ==========-->
+        <Grid Grid.Row="0" Background="{DynamicResource HeaderBackgroundBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!--Logo and Title-->
+            <Grid Grid.Column="0" VerticalAlignment="Center" Margin="10,0,20,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Background="Transparent" CornerRadius="5" Padding="5" Margin="0,0,10,0" VerticalAlignment="Center">
+                    <Image x:Name="LogoImage" Source="Assets/logo.png" 
+                           VerticalAlignment="Center" HorizontalAlignment="Left" 
+                           Stretch="Uniform" MaxHeight="96"
+                           SnapsToDevicePixels="True"
+                           UseLayoutRounding="True"
+                           RenderOptions.BitmapScalingMode="HighQuality"
+                           Cursor="Hand"
+                           MouseLeftButtonUp="LogoImage_MouseLeftButtonUp"/>
+                </Border>
+
+                <Button Grid.Column="1"
+                        VerticalAlignment="Center"
+                        MinHeight="36"
+                        MinWidth="170"
+                        x:Name="HomeButton"
+                        Foreground="White"
+                        TextElement.Foreground="White"
+                        Style="{StaticResource HeaderSubtleButtonStyle}">
+                    <TextBlock Text="{DynamicResource MainWindow.HomeButtonText}" Foreground="White"/>
+                </Button>
+            </Grid>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                <Button MinHeight="36"
+                        MinWidth="130"
+                        Margin="0,0,8,0"
+                        x:Name="MyListButton"
+                        Foreground="White"
+                        TextElement.Foreground="White"
+                        Style="{StaticResource InfoButtonStyle}">
+                    <TextBlock Text="{DynamicResource MainWindow.MyListButtonText}" Foreground="White"/>
+                </Button>
+
+                <Button MinHeight="36"
+                        MinWidth="145"
+                        Margin="0,0,8,0"
+                        x:Name="AiAssistantButton"
+                        Foreground="White"
+                        TextElement.Foreground="White"
+                        Style="{StaticResource PrimaryButtonStyle}">
+                    <TextBlock Text="{DynamicResource MainWindow.AiButtonText}" Foreground="White"/>
+                </Button>
+
+                <Button MinHeight="36"
+                        MinWidth="150"
+                        x:Name="SettingsButton"
+                        Foreground="White"
+                        TextElement.Foreground="White"
+                        Style="{StaticResource HeaderSubtleButtonStyle}">
+                    <TextBlock Text="{DynamicResource MainWindow.SettingsButtonText}" Foreground="White"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!--========== Search and Filter Row ==========-->
+        <Border Grid.Row="1" Margin="12,8,12,8" Padding="10,8"
+                Background="Transparent"
+                BorderThickness="1" CornerRadius="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+            <!--Search Bar with Suggestions-->
+            <Grid Grid.Row="0" Margin="0,0,0,8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.Resources>
+                        <Style x:Key="RoundedSearchTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TextBox">
+                                        <Border Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                CornerRadius="10"
+                                                SnapsToDevicePixels="True">
+                                            <ScrollViewer x:Name="PART_ContentHost"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox Grid.Column="0" x:Name="SearchTextBox"
+                             Style="{StaticResource RoundedSearchTextBoxStyle}"
+                             VerticalContentAlignment="Center"
+                             MinHeight="36"
+                             ToolTip="{DynamicResource MainWindow.SearchToolTip}"/>
+                </Grid>
+
+                <!--Search Suggestions Dropdown-->
+                <ListBox Grid.Row="1" x:Name="SuggestionsListBox" 
+                         Visibility="Collapsed"
+                         MaxHeight="150"
+                         Margin="0,2,0,0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Title}" Padding="10,6" Foreground="{DynamicResource TextPrimaryColor}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+
+            <WrapPanel Grid.Row="1" ItemHeight="36" Orientation="Horizontal">
+                <ComboBox x:Name="GenreComboBox" VerticalContentAlignment="Center" MinHeight="36" MinWidth="150" Margin="0,0,8,8">
+                    <ComboBoxItem IsSelected="True" Content="{DynamicResource Genre.All}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Action}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Adventure}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Comedy}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Drama}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Fantasy}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Horror}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Romance}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.SciFi}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.SliceOfLife}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Sports}"/>
+                    <ComboBoxItem Content="{DynamicResource Genre.Supernatural}"/>
+                </ComboBox>
+
+                <ComboBox x:Name="TypeComboBox" VerticalContentAlignment="Center" MinHeight="36" MinWidth="150" Margin="0,0,8,8">
+                    <ComboBoxItem IsSelected="True" Content="{DynamicResource Type.All}"/>
+                    <ComboBoxItem Content="{DynamicResource Type.TV}"/>
+                    <ComboBoxItem Content="{DynamicResource Type.Movie}"/>
+                    <ComboBoxItem Content="{DynamicResource Type.OVA}"/>
+                    <ComboBoxItem Content="{DynamicResource Type.ONA}"/>
+                    <ComboBoxItem Content="{DynamicResource Type.Special}"/>
+                </ComboBox>
+            </WrapPanel>
+            </Grid>
+        </Border>
+
+        <!--========== Content Area ==========-->
+        <ContentControl Grid.Row="2" x:Name="ContentArea" Background="#FAFAFA"/>
+
+        <!--========== Footer ==========-->
+        <Border Grid.Row="3" Background="{DynamicResource HeaderBackgroundBrush}" BorderBrush="#404040" BorderThickness="0,1,0,0">
+            <TextBlock Text="{DynamicResource MainWindow.FooterText}" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center" 
+                       FontSize="12" Foreground="#CCCCCC"/>
+        </Border>
     </Grid>
 </Window>
