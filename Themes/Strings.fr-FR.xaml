@@ -12,20 +12,20 @@
     <sys:String x:Key="Genre.Adventure" xmlns:sys="clr-namespace:System;assembly=mscorlib">Aventure</sys:String>
     <sys:String x:Key="Genre.Comedy" xmlns:sys="clr-namespace:System;assembly=mscorlib">Comédie</sys:String>
     <sys:String x:Key="Genre.Drama" xmlns:sys="clr-namespace:System;assembly=mscorlib">Drame</sys:String>
-    <sys:String x:Key="Genre.Fantasy" xmlns:sys="clr-namespace:System;assembly=mscorlib">Fantasy</sys:String>
-    <sys:String x:Key="Genre.Horror" xmlns:sys="clr-namespace:System;assembly=mscorlib">Horror</sys:String>
+    <sys:String x:Key="Genre.Fantasy" xmlns:sys="clr-namespace:System;assembly=mscorlib">Fantastique</sys:String>
+    <sys:String x:Key="Genre.Horror" xmlns:sys="clr-namespace:System;assembly=mscorlib">Horreur</sys:String>
     <sys:String x:Key="Genre.Romance" xmlns:sys="clr-namespace:System;assembly=mscorlib">Romance</sys:String>
-    <sys:String x:Key="Genre.SciFi" xmlns:sys="clr-namespace:System;assembly=mscorlib">Sci-Fi</sys:String>
-    <sys:String x:Key="Genre.SliceOfLife" xmlns:sys="clr-namespace:System;assembly=mscorlib">Slice of Life</sys:String>
+    <sys:String x:Key="Genre.SciFi" xmlns:sys="clr-namespace:System;assembly=mscorlib">Science-fiction</sys:String>
+    <sys:String x:Key="Genre.SliceOfLife" xmlns:sys="clr-namespace:System;assembly=mscorlib">Tranche de vie</sys:String>
     <sys:String x:Key="Genre.Sports" xmlns:sys="clr-namespace:System;assembly=mscorlib">Sports</sys:String>
     <sys:String x:Key="Genre.Supernatural" xmlns:sys="clr-namespace:System;assembly=mscorlib">Surnaturel</sys:String>
 
     <sys:String x:Key="Type.All" xmlns:sys="clr-namespace:System;assembly=mscorlib">Tous les types</sys:String>
     <sys:String x:Key="Type.TV" xmlns:sys="clr-namespace:System;assembly=mscorlib">TV</sys:String>
-    <sys:String x:Key="Type.Movie" xmlns:sys="clr-namespace:System;assembly=mscorlib">Movie</sys:String>
+    <sys:String x:Key="Type.Movie" xmlns:sys="clr-namespace:System;assembly=mscorlib">Film</sys:String>
     <sys:String x:Key="Type.OVA" xmlns:sys="clr-namespace:System;assembly=mscorlib">OVA</sys:String>
     <sys:String x:Key="Type.ONA" xmlns:sys="clr-namespace:System;assembly=mscorlib">ONA</sys:String>
-    <sys:String x:Key="Type.Special" xmlns:sys="clr-namespace:System;assembly=mscorlib">Special</sys:String>
+    <sys:String x:Key="Type.Special" xmlns:sys="clr-namespace:System;assembly=mscorlib">Spécial</sys:String>
 
     <sys:String x:Key="HomePage.Title" xmlns:sys="clr-namespace:System;assembly=mscorlib">🎌 Animes de la Saison</sys:String>
     <sys:String x:Key="HomePage.AddToList" xmlns:sys="clr-namespace:System;assembly=mscorlib">Ajouter à ma liste</sys:String>
@@ -89,13 +89,20 @@
     <sys:String x:Key="AnimePage.Themes" xmlns:sys="clr-namespace:System;assembly=mscorlib">Thèmes</sys:String>
     <sys:String x:Key="AnimePage.Studios" xmlns:sys="clr-namespace:System;assembly=mscorlib">Studios</sys:String>
     <sys:String x:Key="AnimePage.Producers" xmlns:sys="clr-namespace:System;assembly=mscorlib">Producteurs</sys:String>
-    <sys:String x:Key="AnimePage.Synopsis" xmlns:sys="clr-namespace:System;assembly=mscorlib">Synopsis</sys:String>
-    <sys:String x:Key="AnimePage.Background" xmlns:sys="clr-namespace:System;assembly=mscorlib">Background: {0}</sys:String>
+    <sys:String x:Key="AnimePage.Synopsis" xmlns:sys="clr-namespace:System;assembly=mscorlib">Résumé</sys:String>
+    <sys:String x:Key="AnimePage.Background" xmlns:sys="clr-namespace:System;assembly=mscorlib">Contexte</sys:String>
     <sys:String x:Key="AnimePage.Trailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Bande Annonce</sys:String>
     <sys:String x:Key="AnimePage.WatchTrailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Voir la bande annonce</sys:String>
+    <sys:String x:Key="AnimePage.EpisodesShort" xmlns:sys="clr-namespace:System;assembly=mscorlib"> ép.</sys:String>
+    <sys:String x:Key="AnimePage.RankLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Rang:</sys:String>
+    <sys:String x:Key="AnimePage.PopularityLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Popularité:</sys:String>
+    <sys:String x:Key="AnimePage.VotesSuffix" xmlns:sys="clr-namespace:System;assembly=mscorlib"> votes</sys:String>
+    <sys:String x:Key="AnimePage.TrailerUnavailable" xmlns:sys="clr-namespace:System;assembly=mscorlib">Bande-annonce indisponible pour cet anime.</sys:String>
+    <sys:String x:Key="AnimePage.TrailerOpenError" xmlns:sys="clr-namespace:System;assembly=mscorlib">Impossible d'ouvrir la bande-annonce : {0}</sys:String>
 
     <sys:String x:Key="Ui.LanguageSaved" xmlns:sys="clr-namespace:System;assembly=mscorlib">Paramètres UI enregistrés.</sys:String>
     <sys:String x:Key="Ui.SettingsTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Paramètres</sys:String>
     <sys:String x:Key="Ui.LoadError" xmlns:sys="clr-namespace:System;assembly=mscorlib">Erreur lors du chargement: {0}</sys:String>
     <sys:String x:Key="Ui.ErrorTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Erreur</sys:String>
+    <sys:String x:Key="Ui.InfoTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Information</sys:String>
 </ResourceDictionary>

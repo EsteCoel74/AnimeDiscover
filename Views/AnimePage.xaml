@@ -58,7 +58,7 @@
                     <TextBlock Text="{Binding CurrentAnime.Year}" FontSize="14" Foreground="White"/>
                     <TextBlock Text=" | " FontSize="14" Foreground="White" Margin="10,0"/>
                     <TextBlock Text="{Binding CurrentAnime.Episodes}" FontSize="14" Foreground="White"/>
-                    <TextBlock Text=" eps" FontSize="14" Foreground="White"/>
+                    <TextBlock Text="{DynamicResource AnimePage.EpisodesShort}" FontSize="14" Foreground="White"/>
                     <TextBlock Text=" | " FontSize="14" Foreground="White" Margin="10,0"/>
                     <TextBlock Text="{Binding CurrentAnime.Score, StringFormat='⭐ 0.0'}" 
                                FontSize="14" Foreground="#FF9800"/>
@@ -133,9 +133,11 @@
                         <StackPanel Margin="0,0,0,10">
                             <TextBlock Text="{DynamicResource AnimePage.RankPopularity}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding CurrentAnime.Rank, StringFormat='Rank: #{0}'}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text="{DynamicResource AnimePage.RankLabel}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text="{Binding CurrentAnime.Rank, StringFormat=' #{0}'}" FontSize="11" Foreground="White"/>
                                 <TextBlock Text=" | " FontSize="11" Foreground="White" Margin="5,0"/>
-                                <TextBlock Text="{Binding CurrentAnime.Popularity, StringFormat='Pop: #{0}'}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text="{DynamicResource AnimePage.PopularityLabel}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text="{Binding CurrentAnime.Popularity, StringFormat=' #{0}'}" FontSize="11" Foreground="White"/>
                             </StackPanel>
                         </StackPanel>
 
@@ -144,7 +146,10 @@
                             <TextBlock Text="{DynamicResource AnimePage.MalScore}" FontSize="12" Foreground="White" Margin="0,0,0,5"/>
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding CurrentAnime.Score, StringFormat='⭐ {0:F1}'}" FontSize="11" Foreground="#FF9800" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding CurrentAnime.ScoredBy, StringFormat=' ({0:N0} votes)'}" FontSize="11" Foreground="White" Margin="5,0,0,0"/>
+                                <TextBlock Text=" (" FontSize="11" Foreground="White" Margin="5,0,0,0"/>
+                                <TextBlock Text="{Binding CurrentAnime.ScoredBy, StringFormat='{}{0:N0}'}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text="{DynamicResource AnimePage.VotesSuffix}" FontSize="11" Foreground="White"/>
+                                <TextBlock Text=")" FontSize="11" Foreground="White"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
@@ -251,9 +256,11 @@
                 </StackPanel>
 
                 <!--Background (si disponible)-->
-                <StackPanel Margin="0,0,0,20">
-                    <TextBlock Text="{Binding CurrentAnime.Background, StringFormat='Background: {0}'}" FontSize="12" 
-                               Foreground="White" TextWrapping="Wrap" LineHeight="16" Visibility="Visible"/>
+                <StackPanel x:Name="BackgroundSection" Margin="0,0,0,20">
+                    <TextBlock Text="{DynamicResource AnimePage.Background}" FontSize="14" FontWeight="Bold"
+                               Foreground="White" Margin="0,0,0,8"/>
+                    <TextBlock x:Name="BackgroundTextBlock" FontSize="12" 
+                               Foreground="White" TextWrapping="Wrap" LineHeight="16"/>
                 </StackPanel>
 
                 <!--Trailer Section (if available)-->
