@@ -23,8 +23,14 @@ namespace AnimeDiscover.Views
         private static readonly Brush FilledStarBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F4B400"));
         private static readonly Brush EmptyStarBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#9AA0A6"));
         private static readonly HttpClient TranslationHttpClient = new();
-        private static readonly ConcurrentDictionary<string, string> FrenchSynopsisCache = new();
-        private string _trailerUrl;
+        private static readonly ConcurrentDictionary<string, string> LocalizedTextCache = new();
+        private string? _trailerUrl;
+
+        // Retourne une chaîne localisée avec fallback.
+        private static string L(string key, string fallback)
+        {
+            return UiPreferencesManager.GetText(key, fallback);
+        }
 
         public AnimePage()
         {
@@ -57,58 +63,90 @@ namespace AnimeDiscover.Views
                     TrailerSection.Visibility = Visibility.Collapsed;
                 }
 
-                _ = ApplyLocalizedSynopsisAsync(controller);
+                _ = ApplyLocalizedContentAsync(controller);
             }
         }
 
-        // Traduit le synopsis en français quand la langue UI sélectionnée est le français.
-        private async Task ApplyLocalizedSynopsisAsync(AnimeController controller)
+        // Localise le synopsis et le background selon la langue UI active.
+        private async Task ApplyLocalizedContentAsync(AnimeController controller)
         {
             var synopsisTextBlock = FindName("SynopsisTextBlock") as TextBlock;
-            if (controller?.CurrentAnime == null || synopsisTextBlock == null)
+            var backgroundTextBlock = FindName("BackgroundTextBlock") as TextBlock;
+            var backgroundSection = FindName("BackgroundSection") as FrameworkElement;
+
+            if (controller?.CurrentAnime == null || synopsisTextBlock == null || backgroundTextBlock == null || backgroundSection == null)
             {
                 return;
             }
 
-            var originalSynopsis = controller.CurrentAnime.Synopsis;
+            var originalSynopsis = controller.CurrentAnime.Synopsis ?? string.Empty;
+            var originalBackground = controller.CurrentAnime.Background ?? string.Empty;
+
             synopsisTextBlock.Text = originalSynopsis;
+            backgroundTextBlock.Text = originalBackground;
+            backgroundSection.Visibility = string.IsNullOrWhiteSpace(originalBackground) ? Visibility.Collapsed : Visibility.Visible;
 
             var selectedLanguage = controller.GetUiLanguage();
-            var isFrench = string.Equals(selectedLanguage, "fr-FR", StringComparison.OrdinalIgnoreCase);
-            if (!isFrench || string.IsNullOrWhiteSpace(originalSynopsis))
+            var targetLanguage = string.Equals(selectedLanguage, "en-US", StringComparison.OrdinalIgnoreCase) ? "en-US" : "fr-FR";
+
+            if (!string.IsNullOrWhiteSpace(originalSynopsis))
             {
-                return;
+                var localizedSynopsis = await GetLocalizedTextAsync(controller.CurrentAnime.Id, "synopsis", originalSynopsis, targetLanguage);
+                if (!string.IsNullOrWhiteSpace(localizedSynopsis))
+                {
+                    synopsisTextBlock.Text = localizedSynopsis;
+                }
             }
 
-            var cacheKey = $"{controller.CurrentAnime.Id}:fr";
-            if (FrenchSynopsisCache.TryGetValue(cacheKey, out var cachedSynopsis))
+            if (!string.IsNullOrWhiteSpace(originalBackground))
             {
-                synopsisTextBlock.Text = cachedSynopsis;
-                return;
+                var localizedBackground = await GetLocalizedTextAsync(controller.CurrentAnime.Id, "background", originalBackground, targetLanguage);
+                if (!string.IsNullOrWhiteSpace(localizedBackground))
+                {
+                    backgroundTextBlock.Text = localizedBackground;
+                }
             }
-
-            var translatedSynopsis = await TranslateSynopsisToFrenchAsync(originalSynopsis);
-            if (string.IsNullOrWhiteSpace(translatedSynopsis))
-            {
-                return;
-            }
-
-            FrenchSynopsisCache[cacheKey] = translatedSynopsis;
-            synopsisTextBlock.Text = translatedSynopsis;
         }
 
-        // Traduit un synopsis anglais en français via le service texte externe.
-        private static async Task<string?> TranslateSynopsisToFrenchAsync(string synopsis)
+        // Retourne un texte localisé avec cache mémoire par anime/champ/langue.
+        private static async Task<string> GetLocalizedTextAsync(int animeId, string fieldName, string text, string targetLanguage)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return string.Empty;
+            }
+
+            var trimmed = text.Trim();
+            var keyPrefix = trimmed[..Math.Min(48, trimmed.Length)];
+            var cacheKey = $"{animeId}:{fieldName}:{targetLanguage}:{trimmed.Length}:{keyPrefix}";
+
+            if (LocalizedTextCache.TryGetValue(cacheKey, out var cachedText))
+            {
+                return cachedText;
+            }
+
+            var localizedText = await TranslateTextAsync(trimmed, targetLanguage);
+            var finalText = string.IsNullOrWhiteSpace(localizedText) ? trimmed : localizedText;
+            LocalizedTextCache[cacheKey] = finalText;
+            return finalText;
+        }
+
+        // Traduit un texte arbitraire vers la langue cible via service externe.
+        private static async Task<string?> TranslateTextAsync(string text, string targetLanguage)
         {
             try
             {
-                var trimmed = synopsis.Trim();
+                var trimmed = text.Trim();
                 if (trimmed.Length > 3000)
                 {
                     trimmed = trimmed[..3000];
                 }
 
-                var prompt = "Traduis ce synopsis d'anime en français. "
+                var languageLabel = string.Equals(targetLanguage, "fr-FR", StringComparison.OrdinalIgnoreCase)
+                    ? "français"
+                    : "anglais";
+
+                var prompt = $"Traduis le texte suivant en {languageLabel}. "
                            + "Réponds uniquement avec la traduction, sans commentaire:\n"
                            + trimmed;
 
@@ -145,7 +183,11 @@ namespace AnimeDiscover.Views
         {
             if (string.IsNullOrWhiteSpace(_trailerUrl))
             {
-                AppMessageBox.Show("Bande annonce indisponible pour cet anime.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppMessageBox.Show(
+                    L("AnimePage.TrailerUnavailable", "Trailer unavailable for this anime."),
+                    L("Ui.InfoTitle", "Information"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
 
@@ -159,7 +201,11 @@ namespace AnimeDiscover.Views
             }
             catch (Exception ex)
             {
-                AppMessageBox.Show($"Impossible d'ouvrir la bande annonce: {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                AppMessageBox.Show(
+                    string.Format(L("AnimePage.TrailerOpenError", "Unable to open trailer: {0}"), ex.Message),
+                    L("Ui.ErrorTitle", "Error"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 

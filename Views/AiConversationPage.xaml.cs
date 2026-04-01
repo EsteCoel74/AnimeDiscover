@@ -380,7 +380,8 @@ namespace AnimeDiscover.Views
         // Construit une réponse en agrégeant et filtrant les résultats Jikan.
         private async Task<RecommendationResponse> GetRecommendationsFromApiAsync(string userPrompt, bool preferNewResults, CancellationToken cancellationToken)
         {
-            var criteria = ExtractPromptCriteria(userPrompt);
+            var resolvedPrompt = NormalizePromptForIntent(userPrompt);
+            var criteria = ExtractPromptCriteria(resolvedPrompt);
 
             if (_isCriteriaLocked && _lastCriteria != null)
             {
@@ -400,17 +401,17 @@ namespace AnimeDiscover.Views
 
                 criteria = lockedCriteria;
             }
-            else if (ShouldReusePreviousCriteria(userPrompt, criteria))
+            else if (ShouldReusePreviousCriteria(resolvedPrompt, criteria))
             {
                 criteria = CloneCriteria(_lastCriteria!);
                 if (!string.IsNullOrWhiteSpace(_lastResolvedPrompt))
                 {
-                    userPrompt = _lastResolvedPrompt;
+                    resolvedPrompt = _lastResolvedPrompt;
                 }
             }
 
             _lastCriteria = CloneCriteria(criteria);
-            _lastResolvedPrompt = userPrompt;
+            _lastResolvedPrompt = resolvedPrompt;
 
             var collected = new List<Datum>();
             var requestBudget = new ApiRequestBudget(MaxApiRequestsPerPrompt);
@@ -421,7 +422,7 @@ namespace AnimeDiscover.Views
                 MergeUnique(collected, criteriaResults);
             }
 
-            foreach (var query in BuildQueryCandidates(userPrompt, criteria))
+            foreach (var query in BuildQueryCandidates(resolvedPrompt, criteria))
             {
                 if (!requestBudget.HasRemaining)
                 {
@@ -596,6 +597,18 @@ namespace AnimeDiscover.Views
         {
             var queries = new List<string>();
 
+            if (criteria.ThemeTerms.Count > 0)
+            {
+                queries.Add(string.Join(" ", criteria.ThemeTerms.Take(4)));
+            }
+
+            if (criteria.GenreTerms.Count > 0)
+            {
+                queries.Add(string.Join(" ", criteria.GenreTerms.Take(4)));
+            }
+
+            queries.AddRange(criteria.AnimeNameHints);
+
             if (!string.IsNullOrWhiteSpace(userPrompt))
             {
                 queries.Add(userPrompt.Trim());
@@ -623,16 +636,35 @@ namespace AnimeDiscover.Views
         // Extrait des critères structurés depuis le prompt utilisateur.
         private static PromptCriteria ExtractPromptCriteria(string prompt)
         {
-            var normalized = NormalizeText(prompt);
+            var normalizedPrompt = NormalizePromptForIntent(prompt);
+            var normalized = NormalizeText(normalizedPrompt);
             var criteria = new PromptCriteria();
 
-            if (Regex.IsMatch(normalized, "\\b(film|movie)\\b")) criteria.Type = "movie";
+            foreach (var themeAlias in ThemeAliasMap)
+            {
+                if (!normalized.Contains(themeAlias.Key, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (!criteria.ThemeTerms.Contains(themeAlias.Value, StringComparer.OrdinalIgnoreCase))
+                {
+                    criteria.ThemeTerms.Add(themeAlias.Value);
+                }
+
+                if (!criteria.MustTerms.Contains(themeAlias.Value, StringComparer.OrdinalIgnoreCase))
+                {
+                    criteria.MustTerms.Add(themeAlias.Value);
+                }
+            }
+
+            if (Regex.IsMatch(normalized, "\\b(film|movie|long metrage|long-metrage|cinema)\\b")) criteria.Type = "movie";
             else if (Regex.IsMatch(normalized, "\\b(ova)\\b")) criteria.Type = "ova";
             else if (Regex.IsMatch(normalized, "\\b(ona)\\b")) criteria.Type = "ona";
-            else if (Regex.IsMatch(normalized, "\\b(tv|serie|série)\\b")) criteria.Type = "tv";
+            else if (Regex.IsMatch(normalized, "\\b(tv|serie|série|anime tv)\\b")) criteria.Type = "tv";
 
-            if (Regex.IsMatch(normalized, "\\b(en cours|airing|actuel)\\b")) criteria.Status = "airing";
-            else if (Regex.IsMatch(normalized, "\\b(termin[eé]|fini|complete)\\b")) criteria.Status = "complete";
+            if (Regex.IsMatch(normalized, "\\b(en cours|en diffusion|airing|actuel|ongoing)\\b")) criteria.Status = "airing";
+            else if (Regex.IsMatch(normalized, "\\b(termin[eé]|fini|complete|completed)\\b")) criteria.Status = "complete";
             else if (Regex.IsMatch(normalized, "\\b(a venir|à venir|prochain|upcoming)\\b")) criteria.Status = "upcoming";
 
             foreach (var alias in GenreAliasMap)
@@ -648,22 +680,35 @@ namespace AnimeDiscover.Views
                     {
                         criteria.MustTerms.Add(alias.Value.Canonical);
                     }
+
+                    if (!criteria.GenreTerms.Contains(alias.Value.Canonical, StringComparer.OrdinalIgnoreCase))
+                    {
+                        criteria.GenreTerms.Add(alias.Value.Canonical);
+                    }
                 }
             }
 
-            var minScoreMatch = Regex.Match(normalized, "(?:score|note)\\s*(?:>=|>|minimum|au dessus de)?\\s*(\\d+(?:[.,]\\d+)?)");
+            foreach (var animeNameHint in ExtractAnimeNameHints(prompt))
+            {
+                if (!criteria.AnimeNameHints.Contains(animeNameHint, StringComparer.OrdinalIgnoreCase))
+                {
+                    criteria.AnimeNameHints.Add(animeNameHint);
+                }
+            }
+
+            var minScoreMatch = Regex.Match(normalized, "(?:score|note|rating)\\s*(?:>=|>|minimum|au dessus de|au moins)?\\s*(\\d+(?:[.,]\\d+)?)");
             if (minScoreMatch.Success && double.TryParse(minScoreMatch.Groups[1].Value.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out var score))
             {
                 criteria.MinScore = Math.Clamp(score, 0, 10);
             }
 
-            var minEpisodesMatch = Regex.Match(normalized, "(?:episodes|épisodes|eps?)\\s*(?:>=|>|minimum|au moins)\\s*(\\d+)");
+            var minEpisodesMatch = Regex.Match(normalized, "(?:episodes?|épisodes?|eps?)\\s*(?:>=|>|minimum|au moins)\\s*(\\d+)");
             if (minEpisodesMatch.Success && int.TryParse(minEpisodesMatch.Groups[1].Value, out var minEpisodes))
             {
                 criteria.MinEpisodes = Math.Max(0, minEpisodes);
             }
 
-            var maxEpisodesMatch = Regex.Match(normalized, "(?:episodes|épisodes|eps?)\\s*(?:<=|<|maximum|au plus)\\s*(\\d+)");
+            var maxEpisodesMatch = Regex.Match(normalized, "(?:episodes?|épisodes?|eps?)\\s*(?:<=|<|maximum|au plus)\\s*(\\d+)");
             if (maxEpisodesMatch.Success && int.TryParse(maxEpisodesMatch.Groups[1].Value, out var maxEpisodes))
             {
                 criteria.MaxEpisodes = Math.Max(0, maxEpisodes);
@@ -698,7 +743,9 @@ namespace AnimeDiscover.Views
                 criteria.ToYear = year;
             }
 
-            if (normalized.Contains("tout public", StringComparison.OrdinalIgnoreCase) || normalized.Contains("pg", StringComparison.OrdinalIgnoreCase))
+            if (normalized.Contains("tout public", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("familial", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("pg", StringComparison.OrdinalIgnoreCase))
             {
                 criteria.Rating = "pg13";
             }
@@ -712,16 +759,18 @@ namespace AnimeDiscover.Views
             }
 
             if (normalized.Contains("manga", StringComparison.OrdinalIgnoreCase)) criteria.Source = "manga";
-            else if (normalized.Contains("light novel", StringComparison.OrdinalIgnoreCase) || normalized.Contains("roman", StringComparison.OrdinalIgnoreCase)) criteria.Source = "light novel";
+            else if (normalized.Contains("light novel", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("novel", StringComparison.OrdinalIgnoreCase)
+                || normalized.Contains("roman", StringComparison.OrdinalIgnoreCase)) criteria.Source = "light novel";
             else if (normalized.Contains("jeu", StringComparison.OrdinalIgnoreCase) || normalized.Contains("game", StringComparison.OrdinalIgnoreCase)) criteria.Source = "game";
             else if (normalized.Contains("original", StringComparison.OrdinalIgnoreCase)) criteria.Source = "original";
 
             var weakWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             {
-                "anime", "animes", "manga", "cherche", "trouve", "donne", "avec", "pour", "dans", "qui", "quoi", "juste", "stp", "svp"
+                "anime", "animes", "manga", "cherche", "trouve", "donne", "avec", "pour", "dans", "qui", "quoi", "juste", "stp", "svp", "bonjour", "salut", "merci"
             };
 
-            foreach (var keyword in TokenizeKeywords(prompt).Where(k => !weakWords.Contains(k)).Take(6))
+            foreach (var keyword in TokenizeKeywords(normalizedPrompt).Where(k => !weakWords.Contains(k)).Take(6))
             {
                 if (!criteria.MustTerms.Contains(keyword, StringComparer.OrdinalIgnoreCase))
                 {
@@ -741,10 +790,51 @@ namespace AnimeDiscover.Views
             }
 
             criteria.QueryText = criteria.MustTerms.Count == 0
-                ? string.Join(" ", TokenizeKeywords(prompt).Take(4))
+                ? string.Join(" ", TokenizeKeywords(normalizedPrompt).Take(4))
                 : string.Join(" ", criteria.MustTerms.Take(6));
 
+            if (string.IsNullOrWhiteSpace(criteria.QueryText) && criteria.AnimeNameHints.Count > 0)
+            {
+                criteria.QueryText = criteria.AnimeNameHints[0];
+            }
+
             return criteria;
+        }
+
+        // Extrait les noms d'animes mentionnés explicitement (entre guillemets ou après "comme/style").
+        private static List<string> ExtractAnimeNameHints(string prompt)
+        {
+            var hints = new List<string>();
+            if (string.IsNullOrWhiteSpace(prompt))
+            {
+                return hints;
+            }
+
+            foreach (Match quotedMatch in Regex.Matches(prompt, "[\"“”'](?<title>[^\"“”']{2,80})[\"“”']"))
+            {
+                var quotedTitle = quotedMatch.Groups["title"].Value.Trim();
+                if (!string.IsNullOrWhiteSpace(quotedTitle))
+                {
+                    hints.Add(quotedTitle);
+                }
+            }
+
+            var normalized = NormalizeText(prompt);
+            var contextualPattern = "(?:comme|style|dans le style de|similaire a|similaire a|like)\\s+([a-z0-9][a-z0-9'!:\\- ]{1,60})";
+            foreach (Match contextualMatch in Regex.Matches(normalized, contextualPattern))
+            {
+                var titleHint = contextualMatch.Groups[1].Value.Trim(' ', '.', ',', ';', ':');
+                if (!string.IsNullOrWhiteSpace(titleHint))
+                {
+                    hints.Add(titleHint);
+                }
+            }
+
+            return hints
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Take(3)
+                .ToList();
         }
 
         // Retourne une synthèse lisible des filtres réellement appliqués.
@@ -752,6 +842,7 @@ namespace AnimeDiscover.Views
         {
             var parts = new List<string>();
 
+            if (criteria.ThemeTerms.Count > 0) parts.Add($"themes: {string.Join(",", criteria.ThemeTerms)}");
             if (!string.IsNullOrWhiteSpace(criteria.Type)) parts.Add($"type: {criteria.Type}");
             if (!string.IsNullOrWhiteSpace(criteria.Status)) parts.Add($"status: {criteria.Status}");
             if (criteria.GenreIds.Count > 0) parts.Add($"genres: {string.Join(",", criteria.GenreIds)}");
@@ -824,6 +915,11 @@ namespace AnimeDiscover.Views
                 return false;
             }
 
+            if (!HasThemeMatch(anime, criteria))
+            {
+                return false;
+            }
+
             if (!HasGenreMatch(anime, criteria))
             {
                 return false;
@@ -876,6 +972,24 @@ namespace AnimeDiscover.Views
 
             var haystack = NormalizeText($"{string.Join(' ', anime?.Genres ?? new List<string>())} {string.Join(' ', anime?.Themes ?? new List<string>())} {anime?.synopsis}");
             return criteria.MustTerms.Any(term => haystack.Contains(term, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Vérifie le match des thèmes officiels fournis par l'API Jikan.
+        private static bool HasThemeMatch(Datum anime, PromptCriteria criteria)
+        {
+            if (criteria.ThemeTerms.Count == 0)
+            {
+                return true;
+            }
+
+            var apiThemesText = NormalizeText(string.Join(' ', anime?.Themes ?? new List<string>()));
+            if (criteria.ThemeTerms.Any(theme => apiThemesText.Contains(NormalizeText(theme), StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            var fallbackText = NormalizeText($"{anime?.title} {anime?.title_english} {anime?.title_japanese} {anime?.synopsis}");
+            return criteria.ThemeTerms.Any(theme => fallbackText.Contains(NormalizeText(theme), StringComparison.OrdinalIgnoreCase));
         }
 
         // Calcule un score de pertinence pour trier les résultats.
@@ -971,7 +1085,7 @@ namespace AnimeDiscover.Views
         // Détecte une demande de continuation (ex: "encore", "plus").
         private static bool IsFollowUpRequest(string prompt)
         {
-            var normalized = NormalizeText(prompt);
+            var normalized = NormalizePromptForIntent(prompt);
             if (string.IsNullOrWhiteSpace(normalized))
             {
                 return false;
@@ -979,7 +1093,7 @@ namespace AnimeDiscover.Views
 
             var patterns = new[]
             {
-                "encore", "plus", "d'autres", "dautres", "autres", "continue", "en plus", "ajoute"
+                "encore", "plus", "d'autres", "dautres", "autres", "continue", "en plus", "ajoute", "more", "again", "next"
             };
 
             return patterns.Any(p => normalized.Contains(p, StringComparison.OrdinalIgnoreCase));
@@ -1034,6 +1148,9 @@ namespace AnimeDiscover.Views
             };
 
             clone.GenreIds.AddRange(source.GenreIds);
+            clone.ThemeTerms.AddRange(source.ThemeTerms);
+            clone.GenreTerms.AddRange(source.GenreTerms);
+            clone.AnimeNameHints.AddRange(source.AnimeNameHints);
             clone.MustTerms.AddRange(source.MustTerms);
             clone.SeedQueries.AddRange(source.SeedQueries);
 
@@ -1060,6 +1177,23 @@ namespace AnimeDiscover.Views
             }
 
             return builder.ToString().Normalize(NormalizationForm.FormC).ToLowerInvariant();
+        }
+
+        // Simplifie le prompt utilisateur pour mieux extraire l'intention de recherche.
+        private static string NormalizePromptForIntent(string prompt)
+        {
+            var normalized = NormalizeText(prompt ?? string.Empty);
+            if (string.IsNullOrWhiteSpace(normalized))
+            {
+                return string.Empty;
+            }
+
+            foreach (var replacement in PromptIntentReplacements)
+            {
+                normalized = normalized.Replace(replacement.Key, replacement.Value, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return Regex.Replace(normalized, "\\s+", " ").Trim();
         }
 
         // Extrait des mots-clés utiles depuis un texte libre.
@@ -1167,6 +1301,9 @@ namespace AnimeDiscover.Views
             public string? Rating { get; set; }
             public string? Source { get; set; }
             public List<int> GenreIds { get; } = new();
+            public List<string> ThemeTerms { get; } = new();
+            public List<string> GenreTerms { get; } = new();
+            public List<string> AnimeNameHints { get; } = new();
             public List<string> MustTerms { get; } = new();
             public List<string> SeedQueries { get; } = new();
         }
@@ -1188,16 +1325,85 @@ namespace AnimeDiscover.Views
             ["drame"] = (8, "drama"),
             ["drama"] = (8, "drama"),
             ["fantasy"] = (10, "fantasy"),
+            ["fantastique"] = (10, "fantasy"),
             ["horreur"] = (14, "horror"),
             ["horror"] = (14, "horror"),
             ["romance"] = (22, "romance"),
             ["science fiction"] = (24, "sci-fi"),
+            ["science-fiction"] = (24, "sci-fi"),
+            ["sf"] = (24, "sci-fi"),
             ["sci-fi"] = (24, "sci-fi"),
             ["sport"] = (30, "sports"),
             ["sports"] = (30, "sports"),
             ["slice of life"] = (36, "slice of life"),
+            ["tranche de vie"] = (36, "slice of life"),
             ["surnaturel"] = (37, "supernatural"),
             ["supernatural"] = (37, "supernatural")
+        };
+
+        // Alias de thèmes officiels Jikan pour prioriser l'intention utilisateur.
+        private static readonly Dictionary<string, string> ThemeAliasMap = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["psychologique"] = "psychological",
+            ["psychological"] = "psychological",
+            ["ecchi"] = "harem",
+            ["harem"] = "harem",
+            ["reverse harem"] = "reverse harem",
+            ["isekai"] = "isekai",
+            ["reincarnation"] = "reincarnation",
+            ["school"] = "school",
+            ["ecole"] = "school",
+            ["école"] = "school",
+            ["mecha"] = "mecha",
+            ["military"] = "military",
+            ["militaire"] = "military",
+            ["music"] = "music",
+            ["musique"] = "music",
+            ["mythology"] = "mythology",
+            ["mythologie"] = "mythology",
+            ["samurai"] = "samurai",
+            ["historical"] = "historical",
+            ["historique"] = "historical",
+            ["space"] = "space",
+            ["espace"] = "space",
+            ["time travel"] = "time travel",
+            ["voyage temporel"] = "time travel",
+            ["super power"] = "super power",
+            ["super-pouvoir"] = "super power",
+            ["video game"] = "video game",
+            ["jeu video"] = "video game",
+            ["jeu vidéo"] = "video game",
+            ["parody"] = "parody",
+            ["parodie"] = "parody",
+            ["gore"] = "gore",
+            ["martial arts"] = "martial arts",
+            ["arts martiaux"] = "martial arts",
+            ["strategy game"] = "strategy game",
+            ["survival"] = "survival",
+            ["workplace"] = "workplace",
+            ["medical"] = "medical",
+            ["detective"] = "detective",
+            ["otaku culture"] = "otaku culture",
+            ["racing"] = "racing",
+            ["team sports"] = "team sports",
+            ["romantic subtext"] = "romantic subtext",
+            ["love polygon"] = "love polygon"
+        };
+
+        // Remplacements pour nettoyer les formulations conversationnelles du prompt.
+        private static readonly Dictionary<string, string> PromptIntentReplacements = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["jveux"] = "je veux",
+            ["j'aimerais"] = "je veux",
+            ["j aimerais"] = "je veux",
+            ["donne moi"] = "",
+            ["trouve moi"] = "",
+            ["fais moi"] = "",
+            ["s'il te plait"] = "",
+            ["s il te plait"] = "",
+            ["please"] = "",
+            ["stp"] = "",
+            ["svp"] = ""
         };
 
         // Mots-clés de fallback par genre pour récupérer plus de résultats pertinents.
