@@ -182,7 +182,7 @@ Commandes usuelles :
 
 ---
 
-## 12. Points d’extension recommandés
+## 12. Points d’extension à venir
 
 - Ajouter tests unitaires pour :
   - parsing prompt IA,
