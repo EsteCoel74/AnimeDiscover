@@ -90,12 +90,19 @@
     <sys:String x:Key="AnimePage.Studios" xmlns:sys="clr-namespace:System;assembly=mscorlib">Studios</sys:String>
     <sys:String x:Key="AnimePage.Producers" xmlns:sys="clr-namespace:System;assembly=mscorlib">Producers</sys:String>
     <sys:String x:Key="AnimePage.Synopsis" xmlns:sys="clr-namespace:System;assembly=mscorlib">Synopsis</sys:String>
-    <sys:String x:Key="AnimePage.Background" xmlns:sys="clr-namespace:System;assembly=mscorlib">Background: {0}</sys:String>
+    <sys:String x:Key="AnimePage.Background" xmlns:sys="clr-namespace:System;assembly=mscorlib">Background</sys:String>
     <sys:String x:Key="AnimePage.Trailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Trailer</sys:String>
     <sys:String x:Key="AnimePage.WatchTrailer" xmlns:sys="clr-namespace:System;assembly=mscorlib">Watch trailer</sys:String>
+    <sys:String x:Key="AnimePage.EpisodesShort" xmlns:sys="clr-namespace:System;assembly=mscorlib"> eps</sys:String>
+    <sys:String x:Key="AnimePage.RankLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Rank:</sys:String>
+    <sys:String x:Key="AnimePage.PopularityLabel" xmlns:sys="clr-namespace:System;assembly=mscorlib">Popularity:</sys:String>
+    <sys:String x:Key="AnimePage.VotesSuffix" xmlns:sys="clr-namespace:System;assembly=mscorlib"> votes</sys:String>
 
+    <sys:String x:Key="AnimePage.TrailerUnavailable" xmlns:sys="clr-namespace:System;assembly=mscorlib">Trailer unavailable for this anime.</sys:String>
+    <sys:String x:Key="AnimePage.TrailerOpenError" xmlns:sys="clr-namespace:System;assembly=mscorlib">Unable to open trailer: {0}</sys:String>
     <sys:String x:Key="Ui.LanguageSaved" xmlns:sys="clr-namespace:System;assembly=mscorlib">UI settings saved.</sys:String>
     <sys:String x:Key="Ui.SettingsTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Settings</sys:String>
     <sys:String x:Key="Ui.LoadError" xmlns:sys="clr-namespace:System;assembly=mscorlib">Loading error: {0}</sys:String>
     <sys:String x:Key="Ui.ErrorTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Error</sys:String>
+    <sys:String x:Key="Ui.InfoTitle" xmlns:sys="clr-namespace:System;assembly=mscorlib">Information</sys:String>
 </ResourceDictionary>
